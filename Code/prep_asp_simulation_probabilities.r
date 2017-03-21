@@ -10,8 +10,6 @@
 # Set up R
 rm(list=ls())
 library(data.table)
-library(ggplot2)
-library(RColorBrewer)
 # -----------------------------
 
 
