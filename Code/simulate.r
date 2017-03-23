@@ -5,79 +5,128 @@
 # Function that takes simulation population and sampling probabilities and 
 # simulates varying levels of data quality for a specified indicator
 # Inputs
-#    - arg1 (class): description
-#    - arg2 (class): description
+#    - popFile (character): name of file with simulation populations
+#    - probFile (character): name of file with simulation probabilities
+#							must contain a variable matching `indicator`
+#    - indicator (character): name of indicator being simulated
 # Outputs
 #    - out (class): description
+# The current working directory should be one above Data/Simulation_Inputs/
 # -------------------------------------------------------------------------
 
 
-# ------------------------------------------
+# ---------------------------------------------------------------
 # Start function
-funcName = function(indicator='unspecified_age') { 
-# ------------------------------------------
-	
-	# -----------------------------
+simulate = function(popFile='simulation_population.csv', 
+					probFile='unspecified_age_probabilities.csv', 
+					indicator='unspecified_age') { 
+# ---------------------------------------------------------------
+		
+	# ------------------------------------------
 	# Set up R
-	args = c('arg1', 'arg2')
-	rm(list=ls()[!ls() %in% args])
+	args = c('popFile', 'probFile', 'indicator')
+	rm(list=ls()[!ls() %in% c(args, 'args')])
 	library(data.table)
-	library(ggplot2)
-	library(RColorBrewer)
-	# -----------------------------
+	# ------------------------------------------
 	
 	
-	# --------------------------------------------------------------
+	# -----------------------------------------------------------------------
 	# Test inputs
-	for(a in args) if (!a %in% ls()) stop(paste('Must provide', a))
-	if (class(arg1)!='CLASS') stop('arg1 must be CLASS') 
-	if (class(arg2)!='CLASS') stop('arg2 must be CLASS') 
-	# --------------------------------------------------------------
+	for(a in args) { 
+		if (!a %in% ls()) stop(paste('Must provide', a))
+		if (class(get(a))!='character') stop(paste0(a, 'must be character'))
+	}
+	# -----------------------------------------------------------------------
 	
 	
-	# -------------------------------------------------------------------------
+	# -----------------------------------------------------------
 	# Files/directories/lists
 	
 	# root directory
 	root = './Data/Simulation_Inputs/'
 	
 	# input files
-	inFile1 = paste0(root, 'filename') # population
-	inFile2 = paste0(root, 'unspecified_age_probabilities.csv') # probabilities
+	inFile1 = paste0(root, popFile) # population
+	inFile2 = paste0(root, probFile) # probabilities
 	
 	# output file
-	outFile = paste0(root, 'filename')
-	# -------------------------------------------------------------------------
+	outFile = paste0(root, paste0(indicator, '_simulation.csv'))
+	# -----------------------------------------------------------
 	
 	
 	# -------------------------------------------------------------------------
 	# Load/prep data
 	
+	# population
+	pop = fread(inFile1)
+	
+	# probabilities
+	probs = fread(inFile2)
+	
+	# collapse out (from the populations) the variable being simulated if necessary
+	byVars = names(pop)[names(pop) %in% names(probs)]
+	pop = pop[, list(births=sum(births)), by=byVars]
+	
+	# rescale probabilities to sum to 1
+	probs[, rescaled:=get(indicator)/sum(get(indicator))]
+	
+	# compute ASPBF: age-sex-parity birth fraction
+	pop[, aspbf:=births/sum(births)]
+	
+	# test fractions
+	if (sum(probs$rescaled)!=1) stop('Simulation probabilities don\'t sum to 1!') 
+	if (sum(pop$aspbf)!=1) stop('Simulation ASPBFs don\'t sum to 1!') 
+	
+	# make sure pop and probs are in the same order/same length
+	simData = merge(pop, probs, by=byVars)
 	# -------------------------------------------------------------------------
 	
 	
-	# -------------------------------------------------------------------------
-	# Do the thing
+	# ----------------------------------------------------------------------------
+	# Define core simulation function
+	# Inputs:
+	# 	- l (numeric) : 1-proportion of births sampled, i.e. "loss"
+	# 	- pop (data.table) : population
+	# 	- probs (data.table) : probabilities
+	# Output:
+	# 	- new_aspbf (numeric vector) : simulated aspbf's under scenario of l loss
+	simFunc = function(l, simData) {
+		simData[, new_births:=births - (rescaled*(l*sum(births)))]
+		new_births = simData$new_births
+		new_births[new_births<0] = 0
+		new_aspbf = new_births/sum(new_births)
+		return(new_aspbf)
+	}
+	# ----------------------------------------------------------------------------
+	
 	
 	# -------------------------------------------------------------------------
+	# Simulate
 	
+	# increment vector
+	b = .01
+	inc = seq(b, 1, by=b)
 	
-	# -------------------------------------------------------------------------
-	# Set up to graph
-	
-	# -------------------------------------------------------------------------
-	
-	
-	# -------------------------------------------------------------------------
-	# Graph
-	
+	# apply simulation
+	simOut = sapply(inc, simFunc, simData)
 	# -------------------------------------------------------------------------
 	
 	
-	# -------------------------------------------------------------------------
+	# --------------------------------------------------------------------
+	# Set up to return output
+	
+	# merge "truth" to simulated
+	simOut = cbind(pop, simOut)
+	
+	# set names
+	setnames(simOut, paste0('V', seq(length(inc))), paste0('aspbf_',inc))
+	# --------------------------------------------------------------------
+	
+	
+	# --------------
 	# Return output
-	return()
-	# -------------------------------------------------------------------------
+	return(simOut)
+	# --------------
 	
 # -------------
 # End function
