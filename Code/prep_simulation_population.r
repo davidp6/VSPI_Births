@@ -29,21 +29,21 @@ outFile = paste0(root, 'Data/Simulation_Inputs/simulation_population.csv')
 # ----------------------------------------------------------------------------------
 
 
-# -------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Load/prep data
 
 # load HFD data
 hfdData = fread(hfdFile)
 
 # load WPP data
-wppData = data.table(read_excel(wppFileSex, sheet='Data', col_names=FALSE))
+wppData = data.table(read_excel(wppFile, sheet='Data', col_names=FALSE))
 
 # prep HFD
 hfdData = hfdData[Year>2000]
 hfdData$Total=NULL
 hfdData = melt(hfdData, id.vars=c('Year','Age'), variable.name='parity', value.name='births')
 hfdData[Age=='12-', Age:='12']
-hfdData[Age=='55+', Age:='55']
+hfdData[Age=='55+', Age:='50']
 hfdData[, Age:=as.numeric(Age)]
 hfdData[, Age:=5*floor(Age/5)]
 hfdData[, parity:=gsub('B', '', parity)]
@@ -54,29 +54,32 @@ hfdData[, parity:=as.numeric(parity)]
 wppData = melt(wppData[3])
 sex_ratio = mean(wppData[11:14]$value)/100
 
-# collapse HFD to all years by age/parity
-hfdData = hfdData[, list(births=sum(births)), by=c('Age','parity')]
+# rename
+setnames(hfdData, 'Age', 'age')
+# --------------------------------------------------------------------------------------------
 
-# multiple by global sex ratio to split
+
+# -------------------------------------------------------------------------
+# Compute population
+
+# cap at parity 4+
+hfdData[parity>4, parity:=4]
+
+# collapse HFD to all years by age/parity
+hfdData = hfdData[, list(births=sum(births)), by=c('age','parity')]
+
+# multiply by global sex ratio to split
 # ratio is m/f, so m/f=ratio and m+f=T, so (1+ratio)*f=T or f=T/(1+ratio)
 hfdData[, f:=births/(sex_ratio+1)]
 hfdData[, m:=births-f]
+
+# reshape long
+hfdData = melt(hfdData, id.vars=c('age', 'parity'), measure.vars=c('m','f'), 
+				variable.name='sex', value.name='births')
 # -------------------------------------------------------------------------
 
 
-# -------------------------------------------------------------------------
-# Do the thing
-
-# -------------------------------------------------------------------------
-
-
-# -------------------------------------------------------------------------
-# Set up to save
-
-# -------------------------------------------------------------------------
-
-
-# -------------------------------------------------------------------------
+# ------------------------------------------------
 # Save
-
-# -------------------------------------------------------------------------
+write.csv(hfdData, file=outFile, row.names=FALSE)
+# ------------------------------------------------
