@@ -74,8 +74,8 @@ simulate = function(popFile='simulation_population.csv',
 	pop[, aspbf:=births/sum(births)]
 	
 	# test fractions
-	if (sum(probs$rescaled)!=1) stop('Simulation probabilities don\'t sum to 1!') 
-	if (sum(pop$aspbf)!=1) stop('Simulation ASPBFs don\'t sum to 1!') 
+	if (round(sum(probs$rescaled),9)!=1) stop('Simulation probabilities don\'t sum to 1!') 
+	if (round(sum(pop$aspbf),9)!=1) stop('Simulation ASPBFs don\'t sum to 1!') 
 	
 	# make sure pop and probs are in the same order/same length
 	simData = merge(pop, probs, by=byVars)

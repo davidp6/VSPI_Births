@@ -9,14 +9,14 @@
 
 # ---------------------------------------------------------------
 # Start function
-simulate = function(toRun=c('age', 'sex', 'parity')) { 
+runSims = function(toRun=c('age', 'sex', 'parity')) { 
 # ---------------------------------------------------------------
 	
-	# ------------------
+	# --------------------------
 	# Set up R
-	rm(list=ls())
+	rm(list=ls()[ls()!='toRun'])
 	library(data.table)
-	# ------------------
+	# --------------------------
 	
 	
 	# ---------------------------------------------------------------------------------
@@ -74,13 +74,13 @@ simulate = function(toRun=c('age', 'sex', 'parity')) {
 	# -------------------------------------------------------------------------
 	
 	
-	# -----------------------------------------------------------------------
+	# ------------------------------------------------------------------------------------------
 	# Save
-	if ('age' %in% toRun) fwrite(ageSim, ageFile)
-	if ('sex' %in% toRun) fwrite(sexSim, sexFile)
-	if ('parity' %in% toRun) fwrite(paritySim, parityFile)
-	if ('completeness' %in% toRun) fwrite(completenessSim, completenessFile)
-	# -----------------------------------------------------------------------
+	if ('age' %in% toRun) write.csv(ageSim, ageFile, row.names=FALSE)
+	if ('sex' %in% toRun) write.csv(sexSim, sexFile, row.names=FALSE)
+	if ('parity' %in% toRun) write.csv(paritySim, parityFile, row.names=FALSE)
+	if ('completeness' %in% toRun) write.csv(completenessSim, completenessFile, row.names=FALSE)
+	# ------------------------------------------------------------------------------------------
 	
 # ------------
 # End function
