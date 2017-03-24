@@ -30,7 +30,7 @@ runSims = function(toRun=c('age', 'sex', 'parity')) {
 	# Directories, files and functions
 	
 	# output files
-	outDir = paste0('./Simulation_Outputs/')
+	outDir = paste0('./Data/Simulation_Outputs/')
 	ageFile = paste0(outDir, 'age_simulations.csv')
 	sexFile = paste0(outDir, 'sex_simulations.csv')
 	parityFile = paste0(outDir, 'parity_simulations.csv')
