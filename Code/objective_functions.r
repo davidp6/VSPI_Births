@@ -11,16 +11,16 @@
 # --------------------------------------------------------------
 
 
-# ------------------------------------------
+# ---------------------------------------------
 # Start function
-objectiveFunction = function(simOut, ) { 
-# ------------------------------------------
+objectiveFunction = function(simOut, metric) { 
+# ---------------------------------------------
 	
-	# -----------------------------
+	# ----------------------------------------------
 	# Set up R
-	rm(list=ls()[ls()!='simOut'])
+	rm(list=ls()[!ls() %in% c('simOut', 'metric')])
 	library(data.table)
-	# -----------------------------
+	# ----------------------------------------------
 	
 	
 	# -----------------------------------------------------------------------
@@ -39,21 +39,22 @@ objectiveFunction = function(simOut, ) {
 		return(accuracy)
 	}
 	# ---------------------------------------------------------------
-
 	
-	# -----------------------------------------------------------
+	
+	# ------------------------------------------------------------------------------------
 	# Compute accuracy for all aspbf_ variables
 	
 	# get list of variables
 	vars = names(simOut)[grepl('aspbf_', names(simOut))]	
 	
 	# apply function
-	accuracy_estimates = sapply(vars, accFunc, simOut)
+	if (metric=='aspbf_accuracy') accuracy_estimates = sapply(vars, aspbfAccuracy, simOut)
+	if (metric=='asfr_accuracy') accuracy_estimates = sapply(vars, asfrAccuracy, simOut)
 	
 	# format
 	accuracy = data.table(level=gsub('aspbf_', '', vars),
 									accuracy=accuracy_estimates)
-	# -----------------------------------------------------------
+	# ------------------------------------------------------------------------------------
 	
 	
 	# ---------------
