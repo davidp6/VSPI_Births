@@ -77,6 +77,9 @@ simulate = function(popFile='simulation_population.csv',
 	if (round(sum(probs$rescaled),9)!=1) stop('Simulation probabilities don\'t sum to 1!') 
 	if (round(sum(pop$aspbf),9)!=1) stop('Simulation ASPBFs don\'t sum to 1!') 
 	
+	# ensure variable classes
+	probs[, parity:=as.numeric(parity)]
+	
 	# make sure pop and probs are in the same order/same length
 	simData = merge(pop, probs, by=byVars)
 	# -------------------------------------------------------------------------
