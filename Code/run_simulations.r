@@ -1,10 +1,14 @@
-# ----------------------------------------
+# ----------------------------------------------------------------------------------------
 # David Phillips
 #
 # 3/23/2017
 # Function that runs all simulations
+# Inputs:
+# - toRun (character) : vector specifying which simulations to evaluate (all is allowed)
+# Outputs:
+# - nothing. saves to ageFile, sexFile, parityFile and/or completenessFile
 # Working directory should be VSPI_Births/
-# ----------------------------------------
+# ----------------------------------------------------------------------------------------
 
 
 # ---------------------------------------------------------------
