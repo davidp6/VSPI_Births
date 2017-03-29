@@ -34,7 +34,7 @@ objectiveFunction = function(simOut, metric) {
 	# ASPF accuracy function
 	aspbfAccuracy = function(var, simOut) {
 		min_fraction = min(simOut$aspbf)
-		error = simOut$aspbf - simOut[[var]]
+		error = abs(simOut$aspbf - simOut[[var]])
 		accuracy = 1 - (sum(error)/(2*(1-min_fraction))) # maybe 1* not 2?
 		return(accuracy)
 	}
