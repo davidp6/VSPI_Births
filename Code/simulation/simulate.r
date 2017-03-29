@@ -94,8 +94,9 @@ simulate = function(popFile='simulation_population.csv',
 	# Output:
 	# 	- new_aspbf (numeric vector) : simulated aspbf's under scenario of l loss
 	simFunc = function(l, simData) {
-		simData[, new_births:=births - (rescaled*(l*sum(births)))]
-		new_births = simData$new_births
+		total_loss = l*sum(simData$births)
+		asp_loss = simData$rescaled*total_loss
+		new_births = simData$births - asp_loss
 		new_births[new_births<0] = 0
 		new_aspbf = new_births/sum(new_births)
 		return(new_aspbf)
@@ -119,7 +120,7 @@ simulate = function(popFile='simulation_population.csv',
 	# Set up to return output
 	
 	# merge "truth" to simulated
-	simOut = cbind(pop, simOut)
+	simOut = cbind(simData[, names(pop), with=FALSE], simOut)
 	
 	# set names
 	setnames(simOut, paste0('V', seq(length(inc))), paste0('aspbf_',inc))
