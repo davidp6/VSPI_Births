@@ -33,9 +33,9 @@ objectiveFunction = function(simOut, metric) {
 	# --------------------------------------------------------------
 	# ASPF accuracy function
 	aspbfAccuracy = function(var, simOut) {
-		min_error = min(simOut$aspbf)
-		abs_error = abs(simOut$aspbf - simOut[[var]])
-		accuracy = 1 - (sum(abs_error)/(2*(1-min_error))) # maybe 1* not 2?
+		min_fraction = min(simOut$aspbf)
+		error = simOut$aspbf - simOut[[var]]
+		accuracy = 1 - (sum(error)/(2*(1-min_fraction))) # maybe 1* not 2?
 		return(accuracy)
 	}
 	# ---------------------------------------------------------------
@@ -52,8 +52,7 @@ objectiveFunction = function(simOut, metric) {
 	if (metric=='asfr_accuracy') accuracy_estimates = sapply(vars, asfrAccuracy, simOut)
 	
 	# format
-	accuracy = data.table(level=gsub('aspbf_', '', vars),
-									accuracy=accuracy_estimates)
+	accuracy = data.table(level=gsub('aspbf_', '', vars), accuracy=accuracy_estimates)
 	# ------------------------------------------------------------------------------------
 	
 	
