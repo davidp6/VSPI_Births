@@ -41,7 +41,7 @@ runSims = function(toRun=c('age', 'sex', 'parity')) {
 	completenessFile = paste0(outDir, 'completeness_simulations.csv')
 	
 	# load function
-	source('./Code/simulate.r')
+	source('./Code/simulation/simulate.r')
 	# ----------------------------------------------------------------
 	
 	

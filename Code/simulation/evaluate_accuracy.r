@@ -49,7 +49,7 @@ evalSims = function(toRun=c('age', 'sex', 'parity'), objective='aspbf_accuracy')
 	outFile = paste0(inDir, 'accuracy_estimates.csv')
 	
 	# load function
-	source('./Code/objective_functions.r')
+	source('./Code/simulation/objective_functions.r')
 	# ----------------------------------------------------------------
 	
 	
