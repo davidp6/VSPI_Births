@@ -39,14 +39,15 @@ tmp[, level:=0]
 tmp[, age:=1]
 tmp[, sex:=1]
 tmp[, parity:=1]
+tmp[, completeness:=1]
 data = rbind(data, tmp)
 
 # melt
 data = melt(data, id.vars='level')
 
-# reverse
+# reverse all (including completeness, which comes out of the simulation reversed)
 data[, level:=as.numeric(level)]
-data[variable!='completeness', level:= 1-level]
+data[, level:= 1-level]
 # ---------------------------------------------
 
 
