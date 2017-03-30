@@ -79,7 +79,7 @@ for(d in seq_along(dts)) {
 		facet_grid(sex~parity) + 
 		scale_color_manual('', values=colors) + 
 		scale_fill_manual('', values='white') + 
-		labs(title=paste('Probability of Unspecified', titles[d]), y='ASPBF', x='Maternal Age') + 
+		labs(title=paste('Probability of Unspecified', titles[d]), y='Probability', x='Maternal Age') + 
 		theme_bw() + 
 		theme(plot.title=element_text(hjust=.5))
 }
