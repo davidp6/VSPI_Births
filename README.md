@@ -35,4 +35,11 @@ Central code for computing the VSPI-B, Vital Statistics Performance Index for Bi
 8. other plot functions to come
 
 #### Data formats:
-[fill in]
+1. Standard Input Format (used by compute_vspib):
+	A csv file with six columns:
+	1. Country - (character) name of country. must be in countrycodes.csv
+	2. Year - (numeric) year of data
+	3. Age - (numeric) maternal age. 99 = unspecified
+	4. Sex - (numeric) 1=male, 2=female, 3=unspecified or both
+	5. Birth order - (character) 1, 2, 3, 4+, 99 (unspecified)
+	6. Number births - (numeric) birth count
