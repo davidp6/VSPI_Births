@@ -21,7 +21,7 @@ library(RColorBrewer)
 # Files/directories/lists
 
 # setting
-var = 'age'
+var = 'completeness'
 Var = toTitleCase(var)
 
 # input file
@@ -69,9 +69,9 @@ for(v in seq_along(vars)) {
 	sample = (1-as.numeric(loss)) * 100
 	plots[[v]] = ggplot(sim, aes(x=age, y=aspbf, color='True Distribution')) + 
 		geom_point() + 
-		geom_smooth() + 
+		geom_smooth(se=FALSE) + 
 		geom_point(aes(y=get(vars[v]), color='Simulated Distribution')) + 
-		geom_smooth(aes(y=get(vars[v]), color='Simulated Distribution')) + 
+		geom_smooth(aes(y=get(vars[v]), color='Simulated Distribution'), se=FALSE) + 
 		facet_grid(sex~parity, scales='free') + 
 		scale_color_manual('', values=colors) + 
 		scale_fill_manual('', values='white') + 
@@ -84,7 +84,7 @@ for(v in seq_along(vars)) {
 
 # -------------------------------------------
 # Save
-pdf(outFile, height=6, width=9)
+pdf(outFile, height=4.5, width=9)
 for(v in seq_along(vars)) print(plots[[v]])
 dev.off()
 # -------------------------------------------

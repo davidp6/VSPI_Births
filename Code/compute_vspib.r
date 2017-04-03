@@ -31,7 +31,7 @@ computeVSPIB = function(inFile='Data 240317.csv', outFile=NULL) {
 	
 	# ---------------------------------------------------------------------
 	# Test inputs
-	if (is.null(outFile)) outFile = inFile
+	if (is.null(outFile)) outFile = paste0('VSPI_B_', inFile)
 	for(a in args) {
 		if (!a %in% ls()) stop(paste('Must provide', a))
 		if (class(get(a))!='character') stop(paste(a, 'must be character'))

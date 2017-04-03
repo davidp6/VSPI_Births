@@ -1,6 +1,7 @@
 # load the function
 rm(list=ls())
 source('./Code/visualization/gbd_map_function.r')
+library(data.table)
 library(foreign)
 library(RColorBrewer)
 
