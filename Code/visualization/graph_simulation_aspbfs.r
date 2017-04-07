@@ -27,7 +27,7 @@ Var = toTitleCase(var)
 inFile = paste0('./Data/Simulation_Outputs/', var, '_simulations.csv')
 
 # output file
-outFile = paste0('./Visualizations/', var, '_simulations.pdf')
+outFile = paste0('./Visualizations/Simulations/', var, '_simulations.pdf')
 # -------------------------------------------------------------------
 
 

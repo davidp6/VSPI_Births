@@ -25,7 +25,7 @@ inFileParity = './Data/Simulation_Inputs/unspecified_parity_probabilities.csv'
 inFileCompleteness = './Data/Simulation_Inputs/completeness_probabilities.csv'
 
 # output file
-outFile = './Visualizations/simulation_probabilities.pdf'
+outFile = './Visualizations/Simulations/simulation_probabilities.pdf'
 # ------------------------------------------------------------------------
 
 

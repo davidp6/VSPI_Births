@@ -22,7 +22,7 @@ library(RColorBrewer)
 inFile = './Data/Simulation_Outputs/accuracy_estimates.csv'
 
 # output file
-outFile = './Visualizations/accuracy_estimates.pdf'
+outFile = './Visualizations/Simulations/accuracy_estimates.pdf'
 # -----------------------------------------------------------
 
 
