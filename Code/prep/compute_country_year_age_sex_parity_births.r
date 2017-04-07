@@ -8,7 +8,6 @@
 # Assumes parity is independent of sex
 # Assumes tfr is independent of age within a country-year
 # Assumes parity is a linear function of age and TFR
-# The current working directory should be VSPI_B/
 # ------------------------------------------------------------
 
 

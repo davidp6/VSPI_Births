@@ -7,7 +7,6 @@
 # - toRun (character) : vector specifying which simulations to evaluate (all is allowed)
 # Outputs:
 # - nothing. saves to ageFile, sexFile, parityFile and/or completenessFile
-# Working directory should be VSPI_Births/
 # ----------------------------------------------------------------------------------------
 
 

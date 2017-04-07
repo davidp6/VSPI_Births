@@ -1,15 +1,14 @@
-# --------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 # David Phillips
 #
 # 3/24/2017
 # Function that evaluates all simulations using an objective function
 # Inputs:
-# - toRun (character) : vector specifying which simulations to evaluate (all is allowed)
+# - toRun (character) : vector specifying which simulations to evaluate ("all" is allowed)
 # - objective (character) : objective function to use (see objective_functions.r)
 # Outputs:
 # - nothing. saves to outFile
-# Working directory should be VSPI_Births/
-# --------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------
 
 
 # -------------------------------------------------------------

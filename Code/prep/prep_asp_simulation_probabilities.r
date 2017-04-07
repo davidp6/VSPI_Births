@@ -3,7 +3,6 @@
 #
 # 3/21/2017
 # Prep simulation probabilities for age/sex/parity using Eurostat tabulations
-# The current working directory should be VSPI_B/
 # ---------------------------------------------------------------------------
 
 

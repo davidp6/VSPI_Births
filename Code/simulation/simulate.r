@@ -11,7 +11,6 @@
 #    - indicator (character): name of indicator being simulated
 # Outputs
 #    - out (class): description
-# The current working directory should be one above Data/Simulation_Inputs/
 # -------------------------------------------------------------------------
 
 

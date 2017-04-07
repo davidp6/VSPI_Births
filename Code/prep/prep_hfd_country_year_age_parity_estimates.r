@@ -3,7 +3,6 @@
 #
 # 3/29/2017
 # Prep HFD births estimates by country-year-age-parity
-# The current working directory should be VSPI_B/
 # -----------------------------------------------------
 
 

@@ -3,7 +3,6 @@
 #
 # 3/21/2017
 # Prep simulation probabilities for crude completeness using Eurostat tabulations and estimated births
-# The current working directory should be VSPI_B/
 # ----------------------------------------------------------------------------------------------------
 
 
