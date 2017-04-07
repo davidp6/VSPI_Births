@@ -4,7 +4,7 @@
 # 3/24/2017
 # Objective function, various ways of computing accuracy
 # Inputs
-#    - sims - (data.table) : output from simulate.r
+#    - simOut - (data.table) : output from simulate.r
 #    - metric - (character) : 'aspbf_accuracy' or 'asfr_accuracy'. which metric of accuracy is desired
 # Outputs
 #    - accuracy (data.table) : two columns: var and accuracy
@@ -30,6 +30,12 @@ objectiveFunction = function(simOut, metric) {
 	# -----------------------------------------------------------------------
 	
 	
+	# -----------------------------------------------------------
+	# Input Files
+	popFile = './Data/Country_Data/WPP_Female_Pop_Estimates.csv'
+	# -----------------------------------------------------------
+	
+	
 	# --------------------------------------------------------------
 	# ASPF accuracy function
 	aspbfAccuracy = function(var, simOut) {
@@ -41,8 +47,37 @@ objectiveFunction = function(simOut, metric) {
 	# ---------------------------------------------------------------
 	
 	
+	# --------------------------------------------------------------
+	# ASFR accuracy function
+	asfrAccuracy = function(var, simOut) {
+		truth = simOut[, list(births=sum(births)), by='age']
+		truth = merge(truth, pop, by='age')
+		truth[, asfr:=births/pop]
+		est = copy(simOut)
+		est[, births:=sum(births)*get(var)]
+		est = est[, list(births=sum(births)), by='age']
+		est = merge(est, pop, by='age')
+		est[, asfr:=births/pop]
+		truth = truth$asfr/sum(truth$asfr)
+		est = est$asfr/sum(est$asfr)
+		min_fraction = min(truth) # could probably refactor aspbfAccuracy and reuse it here
+		error = abs(truth - est)
+		accuracy = 1 - (sum(error)/(2*(1-min_fraction)))
+		return(accuracy)
+	}
+	# ---------------------------------------------------------------
+	
+	
 	# ------------------------------------------------------------------------------------
 	# Compute accuracy for all aspbf_ variables
+	
+	# load/prep female pop if asfr_accuracy
+	if (metric=='asfr_accuracy') {
+		pop = fread(popFile)
+		pop = pop[as.numeric(year)==2015]
+		pop[, age:=as.numeric(age)]
+		pop[, pop:=as.numeric(pop)]
+	}
 	
 	# get list of variables
 	vars = names(simOut)[grepl('aspbf_', names(simOut))]	
