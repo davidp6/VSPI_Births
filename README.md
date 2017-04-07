@@ -1,6 +1,6 @@
 # VSPI_Births
 Central code for computing the VSPI-B, Vital Statistics Performance Index for Births
-The current working directory for every script should be VSPI_B/.
+The current working directory for every script should be VSPI_Births/.
 
 #### Basic approach: simulate accuracy under suboptimal data quality, apply simulation results to real data
 
