@@ -15,8 +15,11 @@ library(RColorBrewer)
 # -------------------
 
 
-# ---------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------
 # Files/directories/lists
+
+# envelope model version
+run_name = 'sur_quadratic_full'
 
 # input file
 inFilecya = './Data/Country_Data/WPP_Country_Year_Age_Estimates.csv'
@@ -25,11 +28,11 @@ inFiletfr = './Data/Country_Data/WPP_Country_Year_TFR_Estimates.csv'
 inFilecyap = './Data/Country_Data/HFD_Country_Year_Age_Parity_Estimates.csv'
 
 # envelope file
-inFileEnv = './Data/Country_Data/Country_Year_Age_Sex_Parity_Births.csv'
+inFileEnv = paste0('./Data/Envelopes/Envelope_', run_name, '.csv')
 
 # output file
-outFile = './Visualizations/Envelopes/births_estimates_fit.pdf'
-# ---------------------------------------------------------------------------
+outFile = paste0('./Visualizations/Envelopes/births_estimates_fit_', run_name, '.pdf')
+# ------------------------------------------------------------------------------------
 
 
 # ---------------------------------------------------------------------------------
@@ -89,12 +92,21 @@ for(i in iso3s) {
 		theme(plot.title=element_text(hjust=.5, size=16), axis.title=element_text(size=14))
 	n=n+1
 }
+
+p1 = ggplot(hfd, aes(x=births, y=births_est, color=super_region)) + 
+	geom_point(alpha=.5) + 
+	geom_abline(slope=1, intercept=0, color='red', linetype='dashed') + 
+	scale_color_manual('', values=brewer.pal(3, 'Set1')) + 
+	labs(title='All Countries', y='Estimated Births', x='Input Births') + 
+	theme_bw() + 
+	theme(plot.title=element_text(hjust=.5, size=16), axis.title=element_text(size=14))
 # -------------------------------------------------------------------------------
 
 
 # -------------------------------------------
 # Save
 pdf(outFile, height=6, width=10)
+p1
 for(i in seq_along(iso3s)) print(plots[[i]])
 dev.off()
 # -------------------------------------------
