@@ -17,7 +17,7 @@ library(data.table)
 # Files/directories/lists
 
 # input file
-inFile1 = './Data/Country_Data/Country_Year_Age_Sex_Parity_Births.csv'
+inFile1 = './Data/Envelopes/Envelope.csv'
 inFile2 = './Data/Country_Data/Data 050417.csv'
 
 # country codes

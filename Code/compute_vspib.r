@@ -46,7 +46,7 @@ computeVSPIB = function(inFile='Data 050417.csv', outFile=NULL) {
 	inFileLoc = paste0('./Data/Country_Data/', inFile)
 	
 	# birth estimates to compute completeness
-	birthFile = './Data/Country_Data/Country_Year_Age_Sex_Parity_Births.csv'
+	birthFile = './Data/Envelopes/Envelope.csv'
 	
 	# simulation estimates
 	simFile = './Data/Simulation_Outputs/accuracy_estimates.csv'
