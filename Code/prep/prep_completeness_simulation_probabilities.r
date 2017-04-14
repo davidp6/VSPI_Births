@@ -18,7 +18,7 @@ library(data.table)
 
 # input file
 inFile1 = './Data/Country_Data/Country_Year_Age_Sex_Parity_Births.csv'
-inFile2 = './Data/Country_Data/Data 240317.csv'
+inFile2 = './Data/Country_Data/Data 050417.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
