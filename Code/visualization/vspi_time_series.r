@@ -21,13 +21,13 @@ library(RColorBrewer)
 # Files/directories/lists
 
 # input file
-inFile ='./Data/VSPI_Estimates/VSPI_B_Data 240317.csv'
+inFile ='./Data/VSPI_Estimates/VSPI_B_Data 110417.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
 
 # output file
-outFile = './Visualizations/VSPI/vspi_estimates_Data 240317.pdf'
+outFile = './Visualizations/VSPI/vspi_estimates_Data 110417.pdf'
 # --------------------------------------------------------------
 
 
@@ -36,6 +36,8 @@ outFile = './Visualizations/VSPI/vspi_estimates_Data 240317.pdf'
 
 # load
 data = fread(inFile)
+data[, births:=as.numeric(births)]
+data = data[!is.na(births)]
 
 # country codes
 codes = fread(ccFile)
@@ -43,8 +45,6 @@ codes = codes[ihme_indic_country==1, c('iso3', 'countryname_ihme'), with=FALSE]
 setnames(codes, 'countryname_ihme', 'country')
 codes = unique(codes)
 data = merge(data, codes, by='iso3')
-
-
 # -------------------------------------------------------------------------
 
 

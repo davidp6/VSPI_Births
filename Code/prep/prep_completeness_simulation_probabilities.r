@@ -18,7 +18,7 @@ library(data.table)
 
 # input file
 inFile1 = './Data/Envelopes/Envelope.csv'
-inFile2 = './Data/Country_Data/Data 050417.csv'
+inFile2 = './Data/Country_Data/Data 110417.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
@@ -51,6 +51,8 @@ data[sex==99, sex_str:='99']
 data$sex = NULL
 setnames(data, 'sex_str', 'sex')
 estimates[, parity:=as.character(parity)]
+data[, births:=as.numeric(births)]
+data = data[!is.na(births)]
 
 # bring in iso codes/drop non-GBD countries
 codes = fread(ccFile)

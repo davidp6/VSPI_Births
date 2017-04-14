@@ -20,7 +20,7 @@ library(data.table)
 root = './Data/'
 
 # input file
-inFile = paste0(root, 'Country_Data/Data 050417.csv')
+inFile = paste0(root, 'Country_Data/Data 110417.csv')
 
 # output file
 outFile1 = paste0(root, 'Simulation_Inputs/unspecified_age_probabilities.csv')
@@ -48,6 +48,8 @@ data[sex==3, sex_str:='both']
 data[sex==99, sex_str:='99']
 data$sex = NULL
 setnames(data, 'sex_str', 'sex')
+data[, births:=as.numeric(births)]
+data = data[!is.na(births)]
 
 # collapse to all countries/years
 denominator = data[, list(births=sum(births, na.rm=TRUE)), by=c('parity', 'age', 'sex')]
