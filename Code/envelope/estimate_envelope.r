@@ -19,7 +19,7 @@ library(stringr)
 # Files/directories/lists
 
 # settings
-run_name = 'sur_quadratic_full'
+run_name = ''
 estFunction = 'sur_quadratic_full'
 
 # functions
