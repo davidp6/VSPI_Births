@@ -17,7 +17,7 @@
 
 # ---------------------------------------------------------------
 # Start function
-computeVSPIB = function(inFile='Data 050417.csv', outFile=NULL) { 
+computeVSPIB = function(inFile='Data 110417.csv', outFile=NULL) { 
 # ---------------------------------------------------------------
 	
 	# ----------------------------------------
@@ -115,6 +115,14 @@ computeVSPIB = function(inFile='Data 050417.csv', outFile=NULL) {
 	warning = paste('Warning!', paste(mc, collapse=' '), 'not in births estimates!')
 	if (length(mc)>0) print(warning)
 	# ---------------------------------------------------------------------------------
+	
+	
+	# -------------------------------------------------------------------------
+	# Test unique identifiers in input data
+	n1 = nrow(data)
+	n2 = nrow(unique(data[,c('country','year','age','sex','parity'),with=F]))
+	if (n1!=n2) stop('Duplicate country-year-age-sex-parities in input data!')
+	# -------------------------------------------------------------------------
 	
 	
 	# --------------------------------------------------------------------------------------
