@@ -36,8 +36,6 @@ outFile = './Visualizations/VSPI/vspi_estimates_Data 200417.pdf'
 
 # load
 data = fread(inFile)
-data[, births:=as.numeric(births)]
-data = data[!is.na(births)]
 
 # country codes
 codes = fread(ccFile)
