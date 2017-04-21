@@ -112,15 +112,25 @@ computeVSPIB = function(inFile='Data 110417.csv', outFile=NULL) {
 	
 	# test if it's possible to estimate completeness
 	mc = data$iso3[!data$iso3 %in% birthData$iso3]
-	warning = paste('Warning!', paste(mc, collapse=' '), 'not in births estimates!')
+	warning = paste('Warning!', paste(unique(mc), collapse=' '), 'not in births estimates!')
 	if (length(mc)>0) print(warning)
 	# ---------------------------------------------------------------------------------
 	
 	
 	# -------------------------------------------------------------------------
 	# Test unique identifiers in input data
+	idVars = c('iso3','year','age','sex','parity')
 	n1 = nrow(data)
-	n2 = nrow(unique(data[,c('country','year','age','sex','parity'),with=F]))
+	n2 = nrow(unique(data[,idVars,with=F])) # check for duplicates again
+	if (n1!=n2) { # attempt to collapse out any duplicate rows (some are true duplicates)
+		attemptCollapse = data[,list(births=mean(births), sdtest=sd(births)), by=idVars]
+		if (!any(attemptCollapse$sdtest>1, na.rm=TRUE)) {
+			data = attemptCollapse
+			data$sdtest = NULL
+		}
+	}
+	n1 = nrow(data)
+	n2 = nrow(unique(data[,idVars,with=F])) # check for duplicates again
 	if (n1!=n2) stop('Duplicate country-year-age-sex-parities in input data!')
 	# -------------------------------------------------------------------------
 	
