@@ -1,4 +1,4 @@
-# -------------------------------
+# ----------------------------------------------------------------------------------
 # David Phillips
 #
 # 4/7/2017
@@ -22,7 +22,10 @@
 # - vspi time series
 # - vspi maps
 # - envelope graphs
-# -------------------------------
+# Note: if there's new data to evaluate, the file path should be updated in:
+# prep_asp_simulation_probabilities.r, prep_completeness_simulation_probabilities.r, 
+# compute_vspib.r, vspi_time_series.r and map_vspi.r. Probably should be refactored
+# ----------------------------------------------------------------------------------
 
 
 # --------------------------------

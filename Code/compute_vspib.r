@@ -17,7 +17,7 @@
 
 # ---------------------------------------------------------------
 # Start function
-computeVSPIB = function(inFile='Data 240317.csv', outFile=NULL) { 
+computeVSPIB = function(inFile='Data 010517.csv', outFile=NULL) { 
 # ---------------------------------------------------------------
 	
 	# ----------------------------------------
@@ -93,7 +93,8 @@ computeVSPIB = function(inFile='Data 240317.csv', outFile=NULL) {
 	data$sex = NULL
 	setnames(data, 'sex_str', 'sex')
 	simData[, level:=as.numeric(level)]
-
+	if (class(data$births)=='character') data[, births:=as.numeric(gsub(',','',births))]
+	
 	# add perfect to simData
 	perf = simData[1]
 	perf[, level:=0]
@@ -111,7 +112,7 @@ computeVSPIB = function(inFile='Data 240317.csv', outFile=NULL) {
 	data$country = NULL
 	
 	# test if it's possible to estimate completeness
-	mc = data$iso3[!data$iso3 %in% birthData$iso3]
+	mc = unique(data$iso3[!data$iso3 %in% birthData$iso3])
 	warning = paste('Warning!', paste(mc, collapse=' '), 'not in births estimates!')
 	if (length(mc)>0) print(warning)
 	# ---------------------------------------------------------------------------------
@@ -181,7 +182,10 @@ computeVSPIB = function(inFile='Data 240317.csv', outFile=NULL) {
 	# merge completeness
 	completenessSim = simData[, c('level','completeness_accuracy'), with=FALSE]
 	completenessSim[, level:=rev(completenessSim$level)]
+	completenessSim[, level:=as.character(level)]
+	data[, completeness:=as.character(completeness)]
 	data = merge(data, completenessSim, by.x='completeness', by.y='level')
+	data[, completeness:=as.numeric(completeness)]
 	# -------------------------------------------------------------------------------------------
 	
 	

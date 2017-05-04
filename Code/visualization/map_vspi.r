@@ -6,12 +6,12 @@ library(foreign)
 library(RColorBrewer)
 
 # read in and format data
-data = fread('./Data/VSPI_Estimates/VSPI_B_Data 240317.csv')
+data = fread('./Data/VSPI_Estimates/VSPI_B_Data 010517.csv')
 data[, mapvar:=vspi_b_ma]
 
 # keep only most recent year with data available
 data[!is.na(unspecified_age), tmp:=year]
-data[, maxyear:=max(tmp, na.rm=TRUE), by='iso3']
+data[, maxyear:=as.numeric(max(tmp, na.rm=TRUE)), by='iso3']
 data = data[year==maxyear]
 data = data.frame(data)
 

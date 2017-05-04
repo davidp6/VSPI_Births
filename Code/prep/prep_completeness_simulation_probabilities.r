@@ -18,7 +18,7 @@ library(data.table)
 
 # input file
 inFile1 = './Data/Country_Data/Country_Year_Age_Sex_Parity_Births.csv'
-inFile2 = './Data/Country_Data/Data 240317.csv'
+inFile2 = './Data/Country_Data/Data 010517.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
@@ -51,6 +51,7 @@ data[sex==99, sex_str:='99']
 data$sex = NULL
 setnames(data, 'sex_str', 'sex')
 estimates[, parity:=as.character(parity)]
+if (class(data$births)=='character') data[, births:=as.numeric(gsub(',','',births))]
 
 # bring in iso codes/drop non-GBD countries
 codes = fread(ccFile)
