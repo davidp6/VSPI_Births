@@ -17,7 +17,7 @@ library(data.table)
 # Files/directories/lists
 
 # input file
-inFile = './Data/Country_Data/Country_Year_Age_Sex_Parity_Births.csv'
+inFile = './Data/Envelopes/Envelope.csv'
 
 # output file
 outFile = './Data/Simulation_Inputs/simulation_population.csv'
@@ -29,6 +29,9 @@ outFile = './Data/Simulation_Inputs/simulation_population.csv'
 
 # load data
 data = fread(inFile)
+
+# keep only appropriate years
+data = data[year>=1980 & year<=2017]
 
 # collapse to "global" level
 byVars = c('age','sex','parity')

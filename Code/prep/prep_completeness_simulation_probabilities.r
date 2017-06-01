@@ -17,8 +17,8 @@ library(data.table)
 # Files/directories/lists
 
 # input file
-inFile1 = './Data/Country_Data/Country_Year_Age_Sex_Parity_Births.csv'
-inFile2 = './Data/Country_Data/Data 010517.csv'
+inFile1 = './Data/Envelopes/Envelope.csv'
+inFile2 = './Data/Country_Data/Data 200417.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
@@ -50,8 +50,8 @@ data[sex==3, sex_str:='both']
 data[sex==99, sex_str:='99']
 data$sex = NULL
 setnames(data, 'sex_str', 'sex')
-estimates[, parity:=as.character(parity)]
-if (class(data$births)=='character') data[, births:=as.numeric(gsub(',','',births))]
+data[, births:=as.numeric(births)]
+data = data[!is.na(births)]
 
 # bring in iso codes/drop non-GBD countries
 codes = fread(ccFile)

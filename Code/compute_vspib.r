@@ -17,7 +17,7 @@
 
 # ---------------------------------------------------------------
 # Start function
-computeVSPIB = function(inFile='Data 010517.csv', outFile=NULL) { 
+computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) { 
 # ---------------------------------------------------------------
 	
 	# ----------------------------------------
@@ -46,7 +46,7 @@ computeVSPIB = function(inFile='Data 010517.csv', outFile=NULL) {
 	inFileLoc = paste0('./Data/Country_Data/', inFile)
 	
 	# birth estimates to compute completeness
-	birthFile = './Data/Country_Data/Country_Year_Age_Sex_Parity_Births.csv'
+	birthFile = './Data/Envelopes/Envelope.csv'
 	
 	# simulation estimates
 	simFile = './Data/Simulation_Outputs/accuracy_estimates.csv'
@@ -112,10 +112,28 @@ computeVSPIB = function(inFile='Data 010517.csv', outFile=NULL) {
 	data$country = NULL
 	
 	# test if it's possible to estimate completeness
-	mc = unique(data$iso3[!data$iso3 %in% birthData$iso3])
-	warning = paste('Warning!', paste(mc, collapse=' '), 'not in births estimates!')
+	mc = data$iso3[!data$iso3 %in% birthData$iso3]
+	warning = paste('Warning!', paste(unique(mc), collapse=' '), 'not in births estimates!')
 	if (length(mc)>0) print(warning)
 	# ---------------------------------------------------------------------------------
+	
+	
+	# -------------------------------------------------------------------------
+	# Test unique identifiers in input data
+	idVars = c('iso3','year','age','sex','parity')
+	n1 = nrow(data)
+	n2 = nrow(unique(data[,idVars,with=F])) # check for duplicates again
+	if (n1!=n2) { # attempt to collapse out any duplicate rows (some are true duplicates)
+		attemptCollapse = data[,list(births=mean(births), sdtest=sd(births)), by=idVars]
+		if (!any(attemptCollapse$sdtest>1, na.rm=TRUE)) {
+			data = attemptCollapse
+			data$sdtest = NULL
+		}
+	}
+	n1 = nrow(data)
+	n2 = nrow(unique(data[,idVars,with=F])) # check for duplicates again
+	if (n1!=n2) stop('Duplicate country-year-age-sex-parities in input data!')
+	# -------------------------------------------------------------------------
 	
 	
 	# --------------------------------------------------------------------------------------

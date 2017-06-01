@@ -6,7 +6,8 @@ library(foreign)
 library(RColorBrewer)
 
 # read in and format data
-data = fread('./Data/VSPI_Estimates/VSPI_B_Data 010517.csv')
+data = fread('./Data/VSPI_Estimates/VSPI_B_Data 200417.csv')
+data = data[!is.na(unspecified_age)]
 data[, mapvar:=vspi_b_ma]
 
 # keep only most recent year with data available

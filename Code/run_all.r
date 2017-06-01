@@ -59,7 +59,7 @@ runAll = function(envelope=FALSE, prep=TRUE, simulation=TRUE, vspi=TRUE, visuali
 		source('./Code/prep/prep_wpp_country_year_tfr_estimates.r')
 		source('./Code/prep/prep_wpp_country_year_age_estimates.r')
 		source('./Code/prep/prep_hfd_country_year_age_parity_estimates.r')
-		source('./Code/envelope/compute_country_year_age_sex_parity_births.r')
+		source('./Code/envelope/estimate_envelope.r')
 	}
 	
 	# other prep code (mostly simulations)
