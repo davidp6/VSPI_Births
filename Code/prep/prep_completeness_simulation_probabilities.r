@@ -18,7 +18,7 @@ library(data.table)
 
 # input file
 inFile1 = './Data/Envelopes/Envelope.csv'
-inFile2 = './Data/Country_Data/Data 200417.csv'
+inFile2 = './Data/Country_Data/Data 200617.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
@@ -38,9 +38,9 @@ estimates = fread(inFile1)
 data = fread(inFile2)
 
 # drop blank columns/rows
-keepVars = c('Country', 'Year', 'Age', 'Sex', 'Birth order', 'Number births')
+keepVars = c('Country', 'Year', 'Age', 'Sex', 'Birth order', 'Birthweight', 'Number births')
 data = data[!is.na(Year), keepVars, with=FALSE]
-setnames(data, keepVars, c('country', 'year', 'age', 'sex', 'parity', 'births'))
+setnames(data, keepVars, c('country', 'year', 'age', 'sex', 'parity', 'bw', 'births'))
 
 # format variables
 data[parity=='4+', parity:='4']
@@ -52,6 +52,12 @@ data$sex = NULL
 setnames(data, 'sex_str', 'sex')
 data[, births:=as.numeric(births)]
 data = data[!is.na(births)]
+data[bw %in% c('1', '<2500'), bw:='2500']
+data[bw %in% c('2', '2500-3499'), bw:='3000']
+data[bw %in% c('3', '3500+'), bw:='3500']
+data[bw=='Unknown', bw:='99']
+data[bw=='N/A', bw:='All']
+estimates[, parity:=as.character(parity)]
 
 # bring in iso codes/drop non-GBD countries
 codes = fread(ccFile)
@@ -62,10 +68,10 @@ data$country = NULL
 
 # merge estimates to data, keep only data that has all variables specified
 setnames(estimates, 'births', 'estimate')
-data = merge(data, estimates, by=c('iso3','year','age','parity','sex'))
+data = merge(data, estimates, by=c('iso3','year','age','parity','sex','bw'))
 
 # collapse to all countries/years
-data = data[, list(births=sum(births), estimate=sum(estimate)), by=c('parity', 'age', 'sex')]
+data = data[, list(births=sum(births), estimate=sum(estimate)), by=c('parity', 'age', 'sex', 'bw')]
 
 # compute crude asp completeness
 data[, completeness:=births/estimate]
@@ -77,7 +83,7 @@ data[completeness>1, completeness:=1]
 # Save
 
 # subset columns
-data = data[, c('age','sex','parity','completeness'), with=FALSE]
+data = data[, c('age','sex','parity','bw','completeness'), with=FALSE]
 
 # save
 write.csv(data, outFile, row.names=FALSE)

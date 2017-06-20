@@ -149,12 +149,4 @@ unspecified_parity = unique(unspecified_parity)
 unspecified_sex = unique(unspecified_sex)
 unspecified_bw = unique(unspecified_bw)
 # -------------------------------------------------------------------------------------
-
-
-# ------------------------------------------------------
-# Save
-write.csv(unspecified_age, outFile1, row.names=FALSE)
-write.csv(unspecified_sex, outFile2, row.names=FALSE)
-write.csv(unspecified_parity, outFile3, row.names=FALSE)
-write.csv(unspecified_bw, outFile4, row.names=FALSE)
-# ------------------------------------------------------
+Lines_tm

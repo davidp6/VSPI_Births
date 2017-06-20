@@ -34,7 +34,7 @@ data = fread(inFile)
 data = data[year>=1980 & year<=2017]
 
 # collapse to "global" level
-byVars = c('age','sex','parity')
+byVars = c('age','sex','parity','bw')
 data =data[, list(births=sum(births)), by=byVars]
 
 # reduce scale for storage

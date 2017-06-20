@@ -30,7 +30,7 @@ evalSims = function(toRun='all', objective='aspbf_accuracy') {
 		if (!a %in% ls()) stop(paste('Must provide', a))
 		if (class(get(a))!='character') stop(paste0(a, 'must be character'))
 	}
-	if ('all' %in% toRun) toRun = c('age', 'sex', 'parity', 'completeness')
+	if ('all' %in% toRun) toRun = c('age', 'sex', 'parity', 'bw', 'completeness')
 	# -----------------------------------------------------------------------
 	
 	
@@ -42,6 +42,7 @@ evalSims = function(toRun='all', objective='aspbf_accuracy') {
 	ageFile = paste0(inDir, 'age_simulations.csv')
 	sexFile = paste0(inDir, 'sex_simulations.csv')
 	parityFile = paste0(inDir, 'parity_simulations.csv')
+	bwFile = paste0(inDir, 'bw_simulations.csv')
 	completenessFile = paste0(inDir, 'completeness_simulations.csv')
 	
 	# output file
