@@ -6,7 +6,7 @@
 # Inputs:
 # - toRun (character) : vector specifying which simulations to evaluate (all is allowed)
 # Outputs:
-# - nothing. saves to ageFile, sexFile, parityFile and/or completenessFile
+# - nothing. saves to ageFile, sexFile, parityFile, bwFile and/or completenessFile
 # ----------------------------------------------------------------------------------------
 
 
@@ -25,7 +25,7 @@ runSims = function(toRun='all') {
 	# ---------------------------------------------------------------------------------
 	# Handle inputs
 	if (class(toRun)!='character') stop('Specify which simulations to run with toRun!')
-	if ('all' %in% toRun) toRun = c('age', 'sex', 'parity', 'completeness')
+	if ('all' %in% toRun) toRun = c('age', 'sex', 'parity', 'bw', 'completeness')
 	# ---------------------------------------------------------------------------------
 	
 	
@@ -37,6 +37,7 @@ runSims = function(toRun='all') {
 	ageFile = paste0(outDir, 'age_simulations.csv')
 	sexFile = paste0(outDir, 'sex_simulations.csv')
 	parityFile = paste0(outDir, 'parity_simulations.csv')
+	bwFile = paste0(outDir, 'bw_simulations.csv')
 	completenessFile = paste0(outDir, 'completeness_simulations.csv')
 	
 	# load function
@@ -68,6 +69,13 @@ runSims = function(toRun='all') {
 						indicator='unspecified_parity')
 	}
 	
+	# parity
+	if ('bw' %in% toRun) {
+		bwSim = simulate(popFile='simulation_population.csv', 
+						probFile='unspecified_bw_probabilities.csv', 
+						indicator='unspecified_bw')
+	}
+	
 	# completeness
 	if ('completeness' %in% toRun) {
 		completenessSim = simulate(popFile='simulation_population.csv', 
@@ -82,6 +90,7 @@ runSims = function(toRun='all') {
 	if ('age' %in% toRun) write.csv(ageSim, ageFile, row.names=FALSE)
 	if ('sex' %in% toRun) write.csv(sexSim, sexFile, row.names=FALSE)
 	if ('parity' %in% toRun) write.csv(paritySim, parityFile, row.names=FALSE)
+	if ('bw' %in% toRun) write.csv(bwSim, bwFile, row.names=FALSE)
 	if ('completeness' %in% toRun) write.csv(completenessSim, completenessFile, row.names=FALSE)
 	# ------------------------------------------------------------------------------------------
 	
