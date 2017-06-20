@@ -112,12 +112,26 @@ unspecified_sex$births = NULL
 unspecified_parity$births = NULL
 unspecified_bw$births = NULL
 
-# expand across target variable, assume equal probabilities
-# e.g. the probability of being an unknown age is the same for all ages
+# make sure proportions are sqaure
 ages = unique(denominator$age)
 parities = unique(denominator$parity)
 sexes = unique(denominator$sex)
 bws = unique(denominator$bw)
+square = data.table(expand.grid(ages, sexes, parities, bws))
+setnames(square, c('age','sex','parity','bw'))
+unspecified_age = merge(unspecified_age, square[,c('parity','sex','bw'),with=FALSE], all=TRUE, by=c('parity','sex','bw'))
+unspecified_sex = merge(unspecified_sex, square[,c('parity','age','bw'),with=FALSE], all=TRUE, by=c('parity','age','bw'))
+unspecified_parity = merge(unspecified_parity, square[,c('age','sex','bw'),with=FALSE], all=TRUE, by=c('age','sex','bw'))
+unspecified_bw = merge(unspecified_bw, square[,c('parity','sex','age'),with=FALSE], all=TRUE, by=c('parity','sex','age'))
+
+# fill in non-square proportions with the minimum
+unspecified_age[, unspecified_age:=ifelse(is.na(unspecified_age), min(unspecified_age,na.rm=TRUE), unspecified_age)]
+unspecified_sex[, unspecified_sex:=ifelse(is.na(unspecified_sex), min(unspecified_sex,na.rm=TRUE), unspecified_sex)]
+unspecified_parity[, unspecified_parity:=ifelse(is.na(unspecified_parity), min(unspecified_parity,na.rm=TRUE), unspecified_parity)]
+unspecified_bw[, unspecified_bw:=ifelse(is.na(unspecified_bw), min(unspecified_bw,na.rm=TRUE), unspecified_bw)]
+
+# expand across target variable, assume equal probabilities
+# e.g. the probability of being an unknown age is the same for all ages
 expIdxa = rep(seq_len(nrow(unspecified_age)), length(ages))
 expIdxp = rep(seq_len(nrow(unspecified_parity)), length(parities))
 expIdxs = rep(seq_len(nrow(unspecified_sex)), length(sexes))
@@ -126,10 +140,14 @@ unspecified_age = unspecified_age[expIdxa]
 unspecified_parity = unspecified_parity[expIdxp]
 unspecified_sex = unspecified_sex[expIdxs]
 unspecified_bw = unspecified_bw[expIdxb]
-unspecified_age[, age:=rep(ages, each=length(sexes)*length(parities)*length(bws))]
-unspecified_parity[, parity:=rep(parities, each=length(ages)*length(sexes)*length(bws))]
-unspecified_sex[, sex:=rep(sexes, each=length(ages)*length(parities)*length(bws))]
-unspecified_bw[, bw:=rep(bws, each=length(sexes)*length(ages)*length(parities))]
+unspecified_age[, age:=rep(ages, length(sexes)*length(parities)*length(bws))]
+unspecified_parity[, parity:=rep(parities, length(ages)*length(sexes)*length(bws))]
+unspecified_sex[, sex:=rep(sexes, length(ages)*length(parities)*length(bws))]
+unspecified_bw[, bw:=rep(bws, length(sexes)*length(ages)*length(parities))]
+unspecified_age = unique(unspecified_age)
+unspecified_parity = unique(unspecified_parity)
+unspecified_sex = unique(unspecified_sex)
+unspecified_bw = unique(unspecified_bw)
 # -------------------------------------------------------------------------------------
 
 
