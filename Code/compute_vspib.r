@@ -17,7 +17,7 @@
 
 # ---------------------------------------------------------------
 # Start function
-computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) { 
+computeVSPIB = function(inFile='Data 200617_fixed.csv', outFile=NULL) { 
 # ---------------------------------------------------------------
 	
 	# ----------------------------------------
@@ -72,7 +72,7 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	birthData = fread(birthFile)
 	
 	# rename simData
-	oldNames = c('age','sex','parity','completeness')
+	oldNames = c('age','sex','parity','completeness','bw')
 	setnames(simData, oldNames, paste0(oldNames, '_accuracy'))
 	
 	# collapse birth estimates to country-year level
@@ -80,9 +80,9 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	birthData = birthData[, list(envelope=sum(births)), by=byVars]
 	
 	# drop blank columns/rows
-	keepVars = c('Country', 'Year', 'Age', 'Sex', 'Birth order', 'Number births')
+	keepVars = c('Country', 'Year', 'Age', 'Sex', 'Birth order', 'Birthweight', 'Number births')
 	data = data[!is.na(Year), keepVars, with=FALSE]
-	setnames(data, keepVars, c('country', 'year', 'age', 'sex', 'parity', 'births'))
+	setnames(data, keepVars, c('country', 'year', 'age', 'sex', 'parity', 'bw', 'births'))
 	
 	# format variables
 	data[parity=='4+', parity:='4']
@@ -94,6 +94,11 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	setnames(data, 'sex_str', 'sex')
 	simData[, level:=as.numeric(level)]
 	if (class(data$births)=='character') data[, births:=as.numeric(gsub(',','',births))]
+	data[bw %in% c('1', '<2500'), bw:='2500']
+	data[bw %in% c('2', '2500-3499'), bw:='3000']
+	data[bw %in% c('3', '3500+'), bw:='3500']
+	data[bw=='Unknown', bw:='99']
+	data[bw=='N/A', bw:='All']
 	
 	# add perfect to simData
 	perf = simData[1]
@@ -101,6 +106,7 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	perf[, age_accuracy:=1]
 	perf[, sex_accuracy:=1]
 	perf[, parity_accuracy:=1]
+	perf[, bw_accuracy:=1]
 	perf[, completeness_accuracy:=1]
 	simData = rbind(perf, simData)
 	
@@ -120,7 +126,7 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	
 	# -------------------------------------------------------------------------
 	# Test unique identifiers in input data
-	idVars = c('iso3','year','age','sex','parity')
+	idVars = c('iso3','year','age','sex','parity','bw')
 	n1 = nrow(data)
 	n2 = nrow(unique(data[,idVars,with=F])) # check for duplicates again
 	if (n1!=n2) { # attempt to collapse out any duplicate rows (some are true duplicates)
@@ -132,7 +138,7 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	}
 	n1 = nrow(data)
 	n2 = nrow(unique(data[,idVars,with=F])) # check for duplicates again
-	if (n1!=n2) stop('Duplicate country-year-age-sex-parities in input data!')
+	if (n1!=n2) stop('Duplicate country-year-age-sex-parity-bws in input data!')
 	# -------------------------------------------------------------------------
 	
 	
@@ -163,6 +169,13 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	data[is.na(unspecified_parity), unspecified_parity:=0]
 	data[, unspecified_parity:=unspecified_parity/total]
 	
+	# bw
+	data[bw %in% c('All','99'), unspecified_bw:=sum(births, na.rm=TRUE), by=byVars]
+	data[, unspecified_bw:=as.numeric(unspecified_bw)]
+	data[, unspecified_bw:=mean(unspecified_bw, na.rm=TRUE), by=byVars]
+	data[is.na(unspecified_bw), unspecified_bw:=0]
+	data[, unspecified_bw:=unspecified_bw/total]
+	
 	# completeness
 	data = merge(data, birthData, by=c('iso3','year'), all.x=TRUE)
 	data[, completeness:=total/envelope]
@@ -174,7 +187,7 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	# Transform proportions to accuracy
 	
 	# reduce to only proportions
-	indicators = c('unspecified_age', 'unspecified_parity', 'unspecified_sex', 'completeness')
+	indicators = c('unspecified_age', 'unspecified_parity', 'unspecified_sex', 'unspecified_bw', 'completeness')
 	data = unique(data[, c(byVars, indicators, 'total'), with=FALSE])
 	
 	# test dimensions
@@ -197,6 +210,10 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	paritySim = simData[, c('level','parity_accuracy'), with=FALSE]
 	data = merge(data, paritySim, by.x='unspecified_parity', by.y='level')
 	
+	# merge bw
+	bwSim = simData[, c('level','bw_accuracy'), with=FALSE]
+	data = merge(data, bwSim, by.x='unspecified_bw', by.y='level')
+	
 	# merge completeness
 	completenessSim = simData[, c('level','completeness_accuracy'), with=FALSE]
 	completenessSim[, level:=rev(completenessSim$level)]
@@ -211,7 +228,7 @@ computeVSPIB = function(inFile='Data 200417.csv', outFile=NULL) {
 	# Compute VSPI-B
 	
 	# product
-	data[, vspi_b:=age_accuracy*sex_accuracy*parity_accuracy*completeness_accuracy]
+	data[, vspi_b:=age_accuracy*sex_accuracy*parity_accuracy*bw_accuracy*completeness_accuracy]
 	
 	# square up country years
 	sq = data.table(expand.grid(unique(data$iso3), seq(1970, 2017)))

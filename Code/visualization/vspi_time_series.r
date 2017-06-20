@@ -21,13 +21,13 @@ library(RColorBrewer)
 # Files/directories/lists
 
 # input file
-inFile ='./Data/VSPI_Estimates/VSPI_B_Data 200417.csv'
+inFile ='./Data/VSPI_Estimates/VSPI_B_Data 200617_fixed.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
 
 # output file
-outFile = './Visualizations/VSPI/vspi_estimates_Data 200417.pdf'
+outFile = './Visualizations/VSPI/vspi_estimates_Data 200617_fixed.pdf'
 # --------------------------------------------------------------
 
 
@@ -96,6 +96,16 @@ graph = function(subData, showOrig) {
 					panel.grid.major=element_line(linetype='dotted'),
 					panel.grid.minor=element_line(linetype='dotted'))
 	
+	# graph birthweight inset
+	plotb = ggplot(subData, aes(y=1-unspecified_bw, x=year)) + 
+				geom_line() + 
+				labs(title='Birth Weight Unspecified', x='', y='') + 
+				ylim(0,1) + 
+				theme_bw() + 
+				theme(plot.title=element_text(hjust=.5), 
+					panel.grid.major=element_line(linetype='dotted'),
+					panel.grid.minor=element_line(linetype='dotted'))
+	
 	# graph main plot
 	plotm = ggplot(subData, aes(y=vspi_b_ma, x=year, shape=isdata, group=iso3)) +
 				geom_hline(yintercept=.6, color='#ff0000', lty='longdash') + 
@@ -127,7 +137,7 @@ graph = function(subData, showOrig) {
 		theme(legend.position=c(0.15,0.15)) 
 	}
 	
-	p = arrangeGrob(plotm, arrangeGrob(plotc, plota, plots, plotp), ncol=2)
+	p = arrangeGrob(plotm, arrangeGrob(plotc, plota, plots, plotp, plotb), ncol=2)
 }
 # -------------------------------------------------------------------------
 
