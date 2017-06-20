@@ -20,7 +20,7 @@ library(RColorBrewer)
 # Files/directories/lists
 
 # setting
-var = 'completeness'
+var = 'parity'
 Var = toTitleCase(var)
 
 # input file
@@ -66,14 +66,16 @@ plots = list()
 for(v in seq_along(vars)) { 
 	loss = gsub('aspbf_', '', vars[v])
 	sample = (1-as.numeric(loss)) * 100
-	plots[[v]] = ggplot(sim, aes(x=age, y=aspbf, color='True Distribution')) + 
+	plots[[v]] = ggplot(sim, aes(x=age, y=aspbf, color='True Distribution', shape=sex, linetype=sex)) + 
 		geom_point() + 
 		geom_smooth(se=FALSE) + 
 		geom_point(aes(y=get(vars[v]), color='Simulated Distribution')) + 
 		geom_smooth(aes(y=get(vars[v]), color='Simulated Distribution'), se=FALSE) + 
-		facet_grid(sex~parity, scales='free') + 
+		facet_grid(bw~parity, scales='free') + 
 		scale_color_manual('', values=colors) + 
 		scale_fill_manual('', values='white') + 
+		scale_shape_manual('', values=c(17, 19)) + 
+		scale_linetype_manual('', values=c(1,3)) + 
 		labs(title=paste0(title, sample, '%'), y='ASPBF', x='Maternal Age') + 
 		theme_bw() + 
 		theme(plot.title=element_text(hjust=.5))

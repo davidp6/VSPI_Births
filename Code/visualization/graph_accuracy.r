@@ -57,11 +57,12 @@ data[, level:= 1-level]
 data[variable=='age', variable:='Age Unspecified*']
 data[variable=='sex', variable:='Sex Unspecified*']
 data[variable=='parity', variable:='Parity Unspecified*']
+data[variable=='bw', variable:='Birth Weight Unspecified*']
 data[variable=='completeness', variable:='Completeness']
 
 # colors/line types
-colors = brewer.pal(4, 'Paired')
-types = c(1, 2, 4, 5)
+colors = brewer.pal(5, 'Paired')
+types = c(1, 2, 4, 5, 3)
 
 # titles
 title = 'Simulated ASPBF Accuracy Associated with Each Indicator'
