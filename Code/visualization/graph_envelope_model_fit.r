@@ -10,6 +10,7 @@
 # Set up R
 rm(list=ls())
 library(data.table)
+library(boot)
 library(ggplot2)
 library(RColorBrewer)
 # -------------------
@@ -19,48 +20,50 @@ library(RColorBrewer)
 # Files/directories/lists
 
 # envelope model version
-run_name = 'sur_quadratic_full'
-
-# input file
-inFilecya = './Data/Country_Data/WPP_Country_Year_Age_Estimates.csv'
-inFilecys = './Data/Country_Data/WPP_Country_Year_Sex_Estimates.csv'
-inFiletfr = './Data/Country_Data/WPP_Country_Year_TFR_Estimates.csv'
-inFilecyap = './Data/Country_Data/HFD_Country_Year_Age_Parity_Estimates.csv'
+run_name = ''
 
 # envelope file
-inFileEnv = paste0('./Data/Envelopes/Envelope_', run_name, '.csv')
+inFileEnv = paste0('./Data/Envelopes/Envelope', run_name, '.csv')
 
 # output file
-outFile = paste0('./Visualizations/Envelopes/births_estimates_fit_', run_name, '.pdf')
+outFile1 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
+outFile2 = paste0('./Visualizations/Envelopes/envelope_model_fit_age', run_name, '.pdf')
+outFile3 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
+outFile4 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
+outFile5 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
+outFile6 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
 # ------------------------------------------------------------------------------------
 
 
 # ---------------------------------------------------------------------------------
 # Load/prep data
 
-# load WPP data
-wpp = fread(inFilecya)
-hfd = fread(inFilecyap)
-wppsex = fread(inFilecys)
-
 # load
-estimates = fread(inFileEnv)
-
-# collapse to age and age-parity levels
-ageLevel = estimates[, list(births=sum(births)), by=c('iso3','year','age')]
-sexRatios = estimates[, list(births=sum(births)), by=c('iso3','year','sex')]
-sexRatios = dcast.data.table(sexRatios, iso3+year~sex)
-sexRatios[, mf_ratio:=m/f]
-apLevel = estimates[, list(births=sum(births)), by=c('iso3','year','age','parity')]
-wpp = merge(wpp, ageLevel, by=c('iso3','year','age'), suffixes=c('','_est'))
-hfd = merge(hfd, apLevel, by=c('iso3','year','age','parity'), suffixes=c('','_est'))
-wppsex = merge(wppsex, sexRatios, by=c('iso3','year'), suffixes=c('','_est'))
+data = fread(inFileEnv)
 
 # format
-hfd[, parity:=as.character(parity)]
-hfd[parity=='4', parity:='4+']
-hfd[, parity:=paste('Birth Order:',parity)]
-hfd[, age:=factor(age, levels=rev(unique(age)), order=TRUE)]
+data[, sex:=ifelse(sex==1, 'Male', 'Female')]
+data[, parity:=ifelse(parity==4, '4+', as.character(parity))]
+data[, parity:=paste('Birth Order:', parity)]
+data[, birthweight:=paste(birthweight, 'g')]
+
+# collapse out certain strata
+byVars = c('iso3','country','year','age','parity','birthweight')
+noSex = data[, list(births_est=sum(births_est), births_obs=sum(births_obs)), by=byVars]
+byVars = c('iso3','country','year','age','birthweight')
+noParity = data[, list(births_est=sum(births_est), births_obs=sum(births_obs)), by=byVars]
+byVars = c('iso3','country','year','age','parity')
+noBW = data[, list(births_est=sum(births_est), births_obs=sum(births_obs)), by=byVars]
+byVars = c('iso3','country','year','age')
+CYA = data[, list(births_est=sum(births_est), births_obs=sum(births_obs)), by=byVars]
+
+# recompute CYA proportions in collapsed data
+noSex[, prop:=births_obs/sum(births_obs), by=c('iso3','year','age')]
+noSex[, pred:=births_est/sum(births_est), by=c('iso3','year','age')]
+noParity[, prop:=births_obs/sum(births_obs), by=c('iso3','year','age')]
+noParity[, pred:=births_est/sum(births_est), by=c('iso3','year','age')]
+noBW[, prop:=births_obs/sum(births_obs), by=c('iso3','year','age')]
+noBW[, pred:=births_est/sum(births_est), by=c('iso3','year','age')]
 # ---------------------------------------------------------------------------------
 
 
@@ -68,7 +71,7 @@ hfd[, age:=factor(age, levels=rev(unique(age)), order=TRUE)]
 # Set up to graph
 
 # levels of graph
-iso3s = unique(hfd$iso3)
+iso3s = unique(data$iso3)
 
 # colors
 colors = brewer.pal(8, 'YlGnBu')[2:8]
@@ -77,29 +80,104 @@ colors = brewer.pal(8, 'YlGnBu')[2:8]
 
 # -------------------------------------------------------------------------------
 # Graph
-plots = list()
+
+# plots over time
+timePlots = list()
 n=1
 for(i in iso3s) { 
-	country = unique(hfd[iso3==i]$country)
+	country = unique(data[iso3==i]$country)
 	
-	plots[[i]] = ggplot(hfd[iso3==i], aes(x=year, y=births, color=age)) + 
+	timePlots[[i]] = ggplot(data[iso3==i], aes(x=year, y=prop, color=age, group=age)) + 
 		geom_point() + 
-		geom_line(aes(y=births_est)) + 
-		facet_wrap(~parity, scales='free') + 
-		scale_color_manual('Maternal Age', values=colors) + 
-		labs(title=country, y='Births', x='Maternal Age') + 
+		geom_line(aes(y=pred)) + 
+		facet_grid(parity~birthweight+sex, scales='free') + 
+		scale_color_gradientn('Maternal Age', colors=colors) + 
+		labs(title=country, subtitle='Births by Maternal Age, Birth Weight, Sex and Parity', 
+			y='Proportion of Births', x='') + 
+		scale_x_continuous(breaks=c(1990, 2010)) + 
 		theme_bw() + 
-		theme(plot.title=element_text(hjust=.5, size=16), axis.title=element_text(size=14))
+		theme(plot.title=element_text(hjust=.5, size=16), plot.subtitle=element_text(hjust=.5), 
+			axis.title=element_text(size=14))
 	n=n+1
 }
 
-p1 = ggplot(hfd, aes(x=births, y=births_est, color=super_region)) + 
-	geom_point(alpha=.5) + 
-	geom_abline(slope=1, intercept=0, color='red', linetype='dashed') + 
-	scale_color_manual('', values=brewer.pal(3, 'Set1')) + 
-	labs(title='All Countries', y='Estimated Births', x='Input Births') + 
-	theme_bw() + 
-	theme(plot.title=element_text(hjust=.5, size=16), axis.title=element_text(size=14))
+# plots over age
+agePlots = list()
+n=1
+for(i in iso3s) { 
+	country = unique(data[iso3==i]$country)
+	
+	agePlots[[i]] = ggplot(data[iso3==i & year %in% seq(1980, 2016, by=5)], aes(x=age, y=prop, color=year, group=year)) + 
+		geom_point() + 
+		geom_line(aes(y=pred)) + 
+		facet_grid(parity~birthweight+sex, scales='free') + 
+		scale_color_gradientn('Year', colors=colors) + 
+		labs(title=country, subtitle='Births by Year, Birth Weight, Sex and Parity', 
+			y='Proportion of Births', x='Maternal Age') + 
+		theme_bw() + 
+		theme(plot.title=element_text(hjust=.5, size=16), plot.subtitle=element_text(hjust=.5), 
+			axis.title=element_text(size=14))
+	n=n+1
+}
+
+# plots without sex
+collapsedPlots1 = list()
+n=1
+for(i in iso3s) { 
+	country = unique(data[iso3==i]$country)
+	
+	collapsedPlots1[[i]] = ggplot(noSex[iso3==i & year %in% seq(1980, 2016, by=5)], aes(x=age, y=prop, color=year, group=year)) + 
+		geom_point() + 
+		geom_line(aes(y=pred)) + 
+		facet_grid(parity~birthweight, scales='free') + 
+		scale_color_gradientn('Year', colors=colors) + 
+		labs(title=country, subtitle='Births by Year, Birth Weight and Parity', 
+			y='Proportion of Births', x='Maternal Age') + 
+		theme_bw() + 
+		theme(plot.title=element_text(hjust=.5, size=16), plot.subtitle=element_text(hjust=.5), 
+			axis.title=element_text(size=14))
+	n=n+1
+}
+
+# plots without sex and parity
+collapsedPlots2 = list()
+n=1
+for(i in iso3s) { 
+	country = unique(data[iso3==i]$country)
+	
+	collapsedPlots3[[i]] = ggplot(noParity[iso3==i & year %in% seq(1980, 2016, by=5)], aes(x=age, y=prop, color=year, group=year)) + 
+		geom_point() + 
+		geom_line(aes(y=pred)) + 
+		facet_wrap(~birthweight, scales='free') + 
+		scale_color_gradientn('Year', colors=colors) + 
+		labs(title=country, subtitle='Births by Year and Birth Weight', 
+			y='Proportion of Births', x='Maternal Age') + 
+		theme_bw() + 
+		theme(plot.title=element_text(hjust=.5, size=16), plot.subtitle=element_text(hjust=.5), 
+			axis.title=element_text(size=14))
+	n=n+1
+}
+
+# plots without sex and birthweight
+collapsedPlots3 = list()
+n=1
+for(i in iso3s) { 
+	country = unique(data[iso3==i]$country)
+	
+	collapsedPlots3[[i]] = ggplot(noBW[iso3==i & year %in% seq(1980, 2016, by=5)], aes(x=age, y=prop, color=year, group=year)) + 
+		geom_point() + 
+		geom_line(aes(y=pred)) + 
+		facet_wrap(~parity, scales='free') + 
+		scale_color_gradientn('Year', colors=colors) + 
+		labs(title=country, subtitle='Births by Year and Parity', 
+			y='Proportion of Births', x='Maternal Age') + 
+		theme_bw() + 
+		theme(plot.title=element_text(hjust=.5, size=16), plot.subtitle=element_text(hjust=.5), 
+			axis.title=element_text(size=14))
+	n=n+1
+}
+
+# plots without sex, birthweight and parity
 # -------------------------------------------------------------------------------
 
 
