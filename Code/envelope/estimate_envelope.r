@@ -2,9 +2,12 @@
 # David Phillips
 #
 # 3/29/2017
-# Compute country-year-age-sex-parity births from WPP and HPD
+# Compute country-year-age-sex-parity births from DHS and WPP
 # Takes data from set_up_envelope_data.r and applies a function
 # ------------------------------------------------------------
+
+# To Do:
+# Maybe SUR is still the right way to go so it can assure that the proportions sum to 1?
 
 
 # ------------------
@@ -12,6 +15,9 @@
 rm(list=ls())
 library(data.table)
 library(stringr)
+library(boot)
+library(lme4)
+library(merTools) # for prediction intervals
 # ------------------
 
 
@@ -20,98 +26,58 @@ library(stringr)
 
 # settings
 run_name = ''
-estFunction = 'sur_quadratic_full'
-
-# functions
-source('./Code/envelope/sur_linear.r')
-source('./Code/envelope/sur_quadratic.r')
-source('./Code/envelope/sur_quadratic_full.r')
-source('./Code/envelope/sur_cubic.r')
 
 # input file
 inFile = './Data/Country_Data/Envelope_Input.csv'
 
-# birthweight proportions file
-bwFile = './Data/Country_Data/Data 200617.csv'
-
 # output file
+outFile = paste0('./Data/Envelopes/Envelope', run_name, '.csv')
+
+# graph file
 outFile = paste0('./Data/Envelopes/Envelope', run_name, '.csv')
 # ------------------------------------------------------------------
 
 
-# -------------------
+# -------------------------------------------------------------
 # Load data
 data = fread(inFile)
-# -------------------
+
+# drop super regions with no data
+data = data[, all_missing:=all(is.na(prop)), by='super_region']
+data = data[all_missing==FALSE]
+data$all_missing = NULL
+
+# logit transform
+quantiles = quantile(data[prop>0 & prop<1]$prop, c(.025, .975), na.rm=TRUE)
+data[, logit_prop:=logit(prop)]
+data[prop==0, logit_prop:=logit(quantiles[1])]
+data[prop==1, logit_prop:=logit(quantiles[2])]
+# -------------------------------------------------------------
 
 
-# -----------------------------------------------------------
-# Predict parity proportions for each CYA
+# --------------------------------------------------------------------------------------
+# Predict ASPB proportions for each CYA and compute births
 
-# run alternative models
-if (estFunction=='sur_linear') data = sur_linear(data)
-if (estFunction=='sur_quadratic') data = sur_quadratic(data)
-if (estFunction=='sur_quadratic_full') data = sur_quadratic_full(data)
-if (estFunction=='sur_cubic') data = sur_cubic(data)
-# -----------------------------------------------------------
+# run mixed effects model
+# lmeFit = lmer(logit_prop ~ super_region + year + age + sex + parity + birthweight + 
+				# (1 | super_region) + (1 | sex) + (1 | birthweight), data)
+				
+# run OLS with full interactions
+fit = lm(logit_prop ~ super_region*year*age*sex*parity*birthweight, data)
 
+# predict
+# data[, c('pred','upper','lower'):=predictInterval(lmeFit, newdata=data, n.sims=2)] # really slow
+data[, 'pred':=predict(fit, newdata=data)]
 
-# -----------------------------------------------------------
-# Add birthweight based on empirical proportions
-# assumes space-time invariance
+# rescale to sum to 1
+data[, pred:=inv.logit(pred)]
+data[, pred:=pred/sum(pred), by=c('country','year','age')]
 
-# load
-bwData = fread(bwFile)
-
-# prep
-	# drop blank columns/rows
-	keepVars = c('Country', 'Year', 'Age', 'Sex', 'Birth order', 'Birthweight', 'Number births')
-	bwData = bwData[!is.na(Year), keepVars, with=FALSE]
-	setnames(bwData, keepVars, c('country', 'year', 'age', 'sex', 'parity', 'bw', 'births'))
-
-	# format variables
-	bwData[parity=='4+', parity:='4']
-	bwData[sex==1, sex_str:='m']
-	bwData[sex==2, sex_str:='f']
-	bwData[sex==3, sex_str:='both']
-	bwData[sex==99, sex_str:='99']
-	bwData$sex = NULL
-	setnames(bwData, 'sex_str', 'sex')
-	bwData[, births:=as.numeric(births)]
-	bwData = bwData[!is.na(births)]
-	bwData[bw %in% c('1', '<2500'), bw:='2500']
-	bwData[bw %in% c('2', '2500-3499'), bw:='3000']
-	bwData[bw %in% c('3', '3500+'), bw:='3500']
-	bwData[bw=='Unknown', bw:='99']
-	bwData[bw=='N/A', bw:='All']
-
-	# keep only country-years that have the intersection of all variables
-	# all/both is not to be confused with unspecified (99). 
-	# so far there's no code for all ages, so I'm creating it based on a mean of 99, just to be safe
-	bwData[, tmp:=mean(age),by=c('country','year')]
-	bwData = bwData[sex!='both' & tmp!=99 & parity!='All' & bw!='All']
-	bwData$tmp = NULL
-	
-	# drop unknowns
-	bwData = bwData[age!=99 & parity!=99 & sex!='99' & bw!='99']
-
-# compute proportions
-bwData = bwData[, list(births=sum(births)), by=c('age','parity','sex','bw')]
-bwData[, prop:=births/sum(births), by=c('age','parity','sex')]
-bwData$births = NULL
-bwData[, parity:=as.numeric(parity)]
-
-# expand out envelopes, merge proportions and multiply
-tmp1 = copy(data)
-tmp2 = copy(data)
-data[, bw:='2500']
-tmp1[, bw:='3000']
-tmp2[, bw:='3500']
-data = rbind(data, tmp1, tmp2)
-data = merge(data, bwData, by=c('age','parity','sex','bw'))
-data[, births:=births*prop]
-data$prop = NULL
-# -----------------------------------------------------------
+# compute births
+data[, births_est:=pred*births]
+# data[, births_upper:=pred_upper*births]
+# data[, births_lower:=pred_lower*births]
+# --------------------------------------------------------------------------------------
 
 
 # ----------------------------------------
