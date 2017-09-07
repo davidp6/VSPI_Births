@@ -29,7 +29,7 @@ outFile = './Data/Country_Data/Envelope_Input.csv'
 # ---------------------------------------------------------------------------
 
 
-# --------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 # Load/prep data
 
 # load country-year-age births
@@ -54,8 +54,7 @@ DHS = DHS[!birthweight %in% c('Don\'t know', 'Not weighed at birth')]
 
 # compute proportion of births in each sex-parity-birthweight by cya
 DHS[, prop:=births/sum(births), by=c('country','year','age')]
-DHS[, sample_size:=sum(births), by=c('country','year','age')]
-DHS$births = NULL
+setnames(DHS, 'births', 'births_obs')
 
 # bring in iso codes
 cc = fread(ccFile)
@@ -65,7 +64,7 @@ DHS$country = NULL
 
 # expand WPP data to "square"
 isos = unique(c(WPP$iso3, DHS$iso3))
-years = unique(c(WPP$year, DHS$year))
+years = seq(1980, 2016)
 ages = unique(c(WPP$age, DHS$age))
 sexes = unique(DHS$sex)
 parities = unique(DHS$parity)
@@ -74,9 +73,21 @@ ids = expand.grid(isos, years, ages, sexes, parities, birthweights)
 setnames(ids, c('Var4','Var5','Var6'), c('sex','parity','birthweight'))
 data = merge(WPP, ids, by.x=c('iso3','year','age'), by.y=c('Var1','Var2','Var3'), all.y=TRUE)
 
+# expand DHS to "square" and properly distinguish between 0 and NA
+isoyears = unique(DHS[,c('iso3','year'),with=FALSE])
+isoyears = paste0(isoyears$iso3, '_', isoyears$year)
+ids = data.table(expand.grid(isoyears, ages, sexes, parities, birthweights))
+ids[, c('iso3', 'year') := tstrsplit(Var1, '_', fixed=TRUE)]
+ids[, year:=as.numeric(year)]
+ids$Var1 = NULL
+DHS = merge(DHS, ids, by.x=c('iso3','year','age','sex','parity','birthweight'), 
+	by.y=c('iso3','year','Var2','Var3','Var4','Var5'), all.y=TRUE)
+DHS[is.na(births_obs), births_obs:=0]
+DHS[is.na(prop), prop:=0]
+
 # merge proportions to birth numbers
 data = merge(data, DHS, by=c('iso3','year','age','sex','parity','birthweight'), all.x=TRUE)
-# --------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------
 
 
 # ----------------------------------------
