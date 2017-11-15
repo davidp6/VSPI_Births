@@ -18,7 +18,7 @@ library(data.table)
 
 # input file
 inFile1 = './Data/Envelopes/Envelope.csv'
-inFile2 = './Data/Country_Data/Data 200617.csv'
+inFile2 = './Data/Country_Data/Data 061117.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
@@ -67,7 +67,10 @@ data = merge(data, codes, by.x='country', by.y='countryname')
 data$country = NULL
 
 # merge estimates to data, keep only data that has all variables specified
-setnames(estimates, 'births', 'estimate')
+setnames(estimates, c('births', 'birthweight'), c('estimate', 'bw'))
+estimates[, age:=as.character(age)]
+estimates[, sex:=as.character(sex)]
+estimates[, sex:=ifelse(sex==1, 'm', 'f')]
 data = merge(data, estimates, by=c('iso3','year','age','parity','sex','bw'))
 
 # collapse to all countries/years
