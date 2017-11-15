@@ -20,7 +20,7 @@ library(data.table)
 root = './Data/'
 
 # input file
-inFile = paste0(root, 'Country_Data/Data 200617.csv')
+inFile = paste0(root, 'Country_Data/Data 061117.csv')
 
 # output file
 outFile1 = paste0(root, 'Simulation_Inputs/unspecified_age_probabilities.csv')
@@ -149,4 +149,12 @@ unspecified_parity = unique(unspecified_parity)
 unspecified_sex = unique(unspecified_sex)
 unspecified_bw = unique(unspecified_bw)
 # -------------------------------------------------------------------------------------
-Lines_tm
+
+
+# ------------------------------------------------------
+# Save
+write.csv(unspecified_age, outFile1, row.names=FALSE)
+write.csv(unspecified_sex, outFile2, row.names=FALSE)
+write.csv(unspecified_parity, outFile3, row.names=FALSE)
+write.csv(unspecified_bw, outFile4, row.names=FALSE)
+# ------------------------------------------------------
