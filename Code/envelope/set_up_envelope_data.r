@@ -20,6 +20,7 @@ library(data.table)
 # input file
 inFileWPP = './Data/Country_Data/WPP_Country_Year_Age_Estimates.csv'
 inFileDHS = './Data/Country_Data/Birth Data_final.xlsx'
+inFileUSS = './Data/Country_Data/Final UK survey data.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
@@ -38,6 +39,9 @@ WPP = fread(inFileWPP)
 # load country-year-age-sex-parity-birthweight numbers from DHS
 DHS = data.table(read_excel(inFileDHS))
 
+# load UK Understanding Society Survey to get more high-income data to go with DHS
+USS = fread(inFileUSS)
+
 # fix data prep error in birthyears
 DHS[b2<100 & b2>80, b2:=b2+1900]
 
@@ -49,9 +53,6 @@ byVars = c('country','b2','mothage','sex','bord1','birthweight')
 DHS = DHS[, list(births=sum(sample_weight)), by=byVars]
 setnames(DHS, c('b2','mothage','bord1'), c('year','age','parity'))
 
-# drop unknown birthweight and assume MCAR
-DHS = DHS[!birthweight %in% c('Don\'t know', 'Not weighed at birth')]
-
 # compute proportion of births in each sex-parity-birthweight by cya
 DHS[, prop:=births/sum(births), by=c('country','year','age')]
 setnames(DHS, 'births', 'births_obs')
@@ -61,6 +62,25 @@ cc = fread(ccFile)
 cc = unique(cc[!is.na(iso3),c('countryname', 'iso3'),with=FALSE])
 DHS = merge(DHS, cc, by.x='country', by.y='countryname', all.x=TRUE)
 DHS$country = NULL
+
+# format USS to match DHS
+USS[, sex:=ifelse(sex=='male', 1, 2)]
+USS[, birthweight:=as.character(birthweight)]
+USS[birthweight=='1', birthweight:='<2500']
+USS[birthweight=='2', birthweight:='2500-3499']
+USS[birthweight=='3', birthweight:='3500+']
+USS[, iso3:='GBR']
+setnames(USS, c('yob', 'mother_age', 'birthorder', 'births'), c('year', 'age', 'parity', 'births_obs'))
+idVars = c('iso3','year','age','sex','parity','birthweight')
+USS = USS[, list('births_obs'=sum(births_obs, na.rm=TRUE)), by=idVars]
+USS[, prop:=births_obs/sum(births_obs), by=c('iso3','year','age')]
+
+# drop unknown birthweight and assume MCAR
+DHS = DHS[!birthweight %in% c('Don\'t know', 'Not weighed at birth')]
+USS = USS[!is.na(birthweight)]
+
+# add USS to DHS
+DHS = rbind(DHS, USS)
 
 # expand WPP data to "square"
 isos = unique(c(WPP$iso3, DHS$iso3))
