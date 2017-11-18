@@ -25,12 +25,13 @@
 # Note: if there's new data to evaluate, the file path should be updated in:
 # prep_asp_simulation_probabilities.r, prep_completeness_simulation_probabilities.r, 
 # compute_vspib.r, vspi_time_series.r and map_vspi.r. Probably should be refactored
+# The working directory should be the root of this repo
 # ----------------------------------------------------------------------------------
 
 
 # --------------------------------
 # Start function
-runAll = function(envelope=FALSE, prep=TRUE, simulation=TRUE, vspi=TRUE, visualizations=TRUE) { 
+runAll = function(envelope=TRUE, prep=TRUE, simulation=TRUE, vspi=TRUE, visualizations=TRUE) { 
 # --------------------------------
 	
 	# -------------------------------------------------------------------
@@ -55,10 +56,7 @@ runAll = function(envelope=FALSE, prep=TRUE, simulation=TRUE, vspi=TRUE, visuali
 	# envelope prep code and estimation
 	if (envelope) {
 		print('Remaking envelopes...')
-		source('./Code/prep/prep_wpp_country_year_sex_estimates.r')
-		source('./Code/prep/prep_wpp_country_year_tfr_estimates.r')
-		source('./Code/prep/prep_wpp_country_year_age_estimates.r')
-		source('./Code/prep/prep_hfd_country_year_age_parity_estimates.r')
+		source('./Code/envelope/set_up_envelope_data.r')
 		source('./Code/envelope/estimate_envelope.r')
 	}
 	
@@ -66,7 +64,7 @@ runAll = function(envelope=FALSE, prep=TRUE, simulation=TRUE, vspi=TRUE, visuali
 	if (prep) {
 		print('Reprepping simulation inputs...')
 		source('./Code/prep/prep_simulation_population.r')
-		source('./Code/prep/prep_asp_simulation_probabilities.r')
+		source('./Code/prep/prep_aspb_simulation_probabilities.r')
 		source('./Code/prep/prep_completeness_simulation_probabilities.r')
 	}
 	
