@@ -15,9 +15,11 @@
 # -------------------------------------------------------------------------------------------
 
 
+# to do: look into cases where the total in the bw=999 group is different than bw!=999
+
 # ---------------------------------------------------------------
 # Start function
-computeVSPIB = function(inFile='Data 200617_fixed.csv', outFile=NULL) { 
+computeVSPIB = function(inFile='Data 061117.csv', outFile=NULL) { 
 # ---------------------------------------------------------------
 	
 	# ----------------------------------------
@@ -77,7 +79,7 @@ computeVSPIB = function(inFile='Data 200617_fixed.csv', outFile=NULL) {
 	
 	# collapse birth estimates to country-year level
 	byVars = c('iso3', 'year')
-	birthData = birthData[, list(envelope=sum(births)), by=byVars]
+	birthData = birthData[, list(envelope=sum(births_est)), by=byVars]
 	
 	# drop blank columns/rows
 	keepVars = c('Country', 'Year', 'Age', 'Sex', 'Birth order', 'Birthweight', 'Number births')
@@ -126,6 +128,7 @@ computeVSPIB = function(inFile='Data 200617_fixed.csv', outFile=NULL) {
 	
 	# -------------------------------------------------------------------------
 	# Test unique identifiers in input data
+	# Duplicates are allowed because sometimes the birthweight numbers are listed separately from the rest
 	idVars = c('iso3','year','age','sex','parity','bw')
 	n1 = nrow(data)
 	n2 = nrow(unique(data[,idVars,with=F])) # check for duplicates again
@@ -136,50 +139,85 @@ computeVSPIB = function(inFile='Data 200617_fixed.csv', outFile=NULL) {
 			data$sdtest = NULL
 		}
 	}
-	n1 = nrow(data)
-	n2 = nrow(unique(data[,idVars,with=F])) # check for duplicates again
-	if (n1!=n2) stop('Duplicate country-year-age-sex-parity-bws in input data!')
 	# -------------------------------------------------------------------------
 	
 	
 	# --------------------------------------------------------------------------------------
 	# Compute proportions
 	
+	# split out the data that does and doesn't have bw listed separately
+	# IS THERE A SMARTER WAY TO DO THIS?
+	data_notsep = data[bw!=999]
+	data_sep = data[bw==999]
+	
 	# denominator
-	data[, total:=sum(births, na.rm=TRUE), by=byVars]
+	data_notsep[, total:=sum(births, na.rm=TRUE), by=byVars]
+	data_sep[, total:=sum(births, na.rm=TRUE), by=byVars]
 	
 	# age
-	data[age==99, unspecified_age:=sum(births, na.rm=TRUE), by=byVars]
-	data[, unspecified_age:=as.numeric(unspecified_age)]
-	data[, unspecified_age:=mean(unspecified_age, na.rm=TRUE), by=byVars]
-	data[is.na(unspecified_age), unspecified_age:=0]
-	data[, unspecified_age:=unspecified_age/total]
+	data_notsep[age %in% c('All','99'), unspecified_age:=sum(births, na.rm=TRUE), by=byVars]
+	data_notsep[, unspecified_age:=as.numeric(unspecified_age)]
+	data_notsep[, unspecified_age:=mean(unspecified_age, na.rm=TRUE), by=byVars]
+	data_notsep[is.na(unspecified_age), unspecified_age:=0]
+	data_notsep[, unspecified_age:=unspecified_age/total]
+	data_sep[age %in% c('All','99'), unspecified_age:=sum(births, na.rm=TRUE), by=byVars]
+	data_sep[, unspecified_age:=as.numeric(unspecified_age)]
+	data_sep[, unspecified_age:=mean(unspecified_age, na.rm=TRUE), by=byVars]
+	data_sep[is.na(unspecified_age), unspecified_age:=0]
+	data_sep[, unspecified_age:=unspecified_age/total]
 	
 	# sex
-	data[sex %in% c('both','99'), unspecified_sex:=sum(births, na.rm=TRUE), by=byVars]
-	data[, unspecified_sex:=as.numeric(unspecified_sex)]
-	data[, unspecified_sex:=mean(unspecified_sex, na.rm=TRUE), by=byVars]
-	data[is.na(unspecified_sex), unspecified_sex:=0]
-	data[, unspecified_sex:=unspecified_sex/total]
+	data_notsep[sex %in% c('both','99'), unspecified_sex:=sum(births, na.rm=TRUE), by=byVars]
+	data_notsep[, unspecified_sex:=as.numeric(unspecified_sex)]
+	data_notsep[, unspecified_sex:=mean(unspecified_sex, na.rm=TRUE), by=byVars]
+	data_notsep[is.na(unspecified_sex), unspecified_sex:=0]
+	data_notsep[, unspecified_sex:=unspecified_sex/total]
+	data_sep[sex %in% c('both','99'), unspecified_sex:=sum(births, na.rm=TRUE), by=byVars]
+	data_sep[, unspecified_sex:=as.numeric(unspecified_sex)]
+	data_sep[, unspecified_sex:=mean(unspecified_sex, na.rm=TRUE), by=byVars]
+	data_sep[is.na(unspecified_sex), unspecified_sex:=0]
+	data_sep[, unspecified_sex:=unspecified_sex/total]
 	
 	# parity
-	data[parity %in% c('All','99'), unspecified_parity:=sum(births, na.rm=TRUE), by=byVars]
-	data[, unspecified_parity:=as.numeric(unspecified_parity)]
-	data[, unspecified_parity:=mean(unspecified_parity, na.rm=TRUE), by=byVars]
-	data[is.na(unspecified_parity), unspecified_parity:=0]
-	data[, unspecified_parity:=unspecified_parity/total]
+	data_notsep[parity %in% c('All','99'), unspecified_parity:=sum(births, na.rm=TRUE), by=byVars]
+	data_notsep[, unspecified_parity:=as.numeric(unspecified_parity)]
+	data_notsep[, unspecified_parity:=mean(unspecified_parity, na.rm=TRUE), by=byVars]
+	data_notsep[is.na(unspecified_parity), unspecified_parity:=0]
+	data_notsep[, unspecified_parity:=unspecified_parity/total]
+	data_sep[parity %in% c('All','99'), unspecified_parity:=sum(births, na.rm=TRUE), by=byVars]
+	data_sep[, unspecified_parity:=as.numeric(unspecified_parity)]
+	data_sep[, unspecified_parity:=mean(unspecified_parity, na.rm=TRUE), by=byVars]
+	data_sep[is.na(unspecified_parity), unspecified_parity:=0]
+	data_sep[, unspecified_parity:=unspecified_parity/total]
 	
-	# bw
-	data[bw %in% c('All','99'), unspecified_bw:=sum(births, na.rm=TRUE), by=byVars]
-	data[, unspecified_bw:=as.numeric(unspecified_bw)]
-	data[, unspecified_bw:=mean(unspecified_bw, na.rm=TRUE), by=byVars]
-	data[is.na(unspecified_bw), unspecified_bw:=0]
-	data[, unspecified_bw:=unspecified_bw/total]
+	# bw - note: 999 means there's a duplicate cy for birthweight (listed separately)
+	data_notsep[bw %in% c('All','99'), unspecified_bw:=sum(births, na.rm=TRUE), by=byVars]
+	data_notsep[, unspecified_bw:=as.numeric(unspecified_bw)]
+	data_notsep[, unspecified_bw:=mean(unspecified_bw, na.rm=TRUE), by=byVars]
+	data_notsep[is.na(unspecified_bw), unspecified_bw:=0]
+	data_notsep[, unspecified_bw:=unspecified_bw/total]
+	data_sep[bw %in% c('All','99'), unspecified_bw:=sum(births, na.rm=TRUE), by=byVars]
+	data_sep[, unspecified_bw:=as.numeric(unspecified_bw)]
+	data_sep[, unspecified_bw:=mean(unspecified_bw, na.rm=TRUE), by=byVars]
+	data_sep[is.na(unspecified_bw), unspecified_bw:=0]
+	data_sep[, unspecified_bw:=unspecified_bw/total]
 	
 	# completeness
-	data = merge(data, birthData, by=c('iso3','year'), all.x=TRUE)
-	data[, completeness:=total/envelope]
-	data[completeness>1, completeness:=1]
+	data_notsep = merge(data_notsep, birthData, by=c('iso3','year'), all.x=TRUE)
+	data_notsep[, completeness:=total/envelope]
+	data_notsep[completeness>1, completeness:=1]
+	data_sep = merge(data_sep, birthData, by=c('iso3','year'), all.x=TRUE)
+	data_sep[, completeness:=total/envelope]
+	data_sep[completeness>1, completeness:=1]
+	
+	# append together the sep and notsep datasets and give each country the best of the two
+	data = rbind(data_notsep, data_sep)
+	data[, unspecified_age:=min(unspecified_age), by=byVars]
+	data[, unspecified_sex:=min(unspecified_sex), by=byVars]
+	data[, unspecified_parity:=min(unspecified_parity), by=byVars]
+	data[, unspecified_bw:=max(unspecified_bw), by=byVars] # bw is the only one to take the worst of since it's garaunteed to be 0 in 'sep'
+	data[, completeness:=max(completeness), by=byVars]
+	data[, total:=mean(total), by=byVars] # sometimes the totals are different! shouldn't happen
 	# --------------------------------------------------------------------------------------
 	
 	
