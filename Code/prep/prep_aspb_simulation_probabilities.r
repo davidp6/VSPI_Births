@@ -56,13 +56,11 @@ data[bw %in% c('2', '2500-3499'), bw:='3000']
 data[bw %in% c('3', '3500+'), bw:='3500']
 data[bw=='Unknown', bw:='99']
 data[bw=='N/A', bw:='All']
+data[, age:=as.numeric(age)]
 
 # keep only country-years that have the intersection of all variables
 # all/both is not to be confused with unspecified (99). 
-# so far there's no code for all ages, so I'm creating it based on a mean of 99, just to be safe
-data[, tmp:=mean(age),by=c('country','year')]
-data = data[sex!='both' & tmp!=99 & parity!='All' & bw!='All']
-data$tmp = NULL
+data = data[sex!='both' & age!='All' & parity!='All' & bw!='All']
 
 # collapse to all countries/years
 denominator = data[, list(births=sum(births, na.rm=TRUE)), by=c('parity', 'age', 'sex', 'bw')]

@@ -44,6 +44,9 @@ USS = fread(inFileUSS)
 
 # fix data prep error in birthyears
 DHS[b2<100 & b2>80, b2:=b2+1900]
+DHS[birthweight %in% c('1', '<2500'), birthweight:='2500']
+DHS[birthweight %in% c('2', '2500-3499'), birthweight:='3000']
+DHS[birthweight %in% c('3', '3500+'), birthweight:='3500']
 
 # combine 10-14 and 15-19 age groups to match WPP
 DHS[mothage==10, mothage:=15]
@@ -66,9 +69,10 @@ DHS$country = NULL
 # format USS to match DHS
 USS[, sex:=ifelse(sex=='male', 1, 2)]
 USS[, birthweight:=as.character(birthweight)]
-USS[birthweight=='1', birthweight:='<2500']
-USS[birthweight=='2', birthweight:='2500-3499']
-USS[birthweight=='3', birthweight:='3500+']
+USS[birthweight %in% c('1', '<2500'), birthweight:='2500']
+USS[birthweight %in% c('2', '2500-3499'), birthweight:='3000']
+USS[birthweight %in% c('3', '3500+'), birthweight:='3500']
+USS[mother_age>45, mother_age:=45]
 USS[, iso3:='GBR']
 setnames(USS, c('yob', 'mother_age', 'birthorder', 'births'), c('year', 'age', 'parity', 'births_obs'))
 idVars = c('iso3','year','age','sex','parity','birthweight')

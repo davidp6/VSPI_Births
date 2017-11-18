@@ -55,9 +55,11 @@ data = data[!is.na(births)]
 data[bw %in% c('1', '<2500'), bw:='2500']
 data[bw %in% c('2', '2500-3499'), bw:='3000']
 data[bw %in% c('3', '3500+'), bw:='3500']
+
 data[bw=='Unknown', bw:='99']
 data[bw=='N/A', bw:='All']
 estimates[, parity:=as.character(parity)]
+data[, age:=as.numeric(age)]
 
 # bring in iso codes/drop non-GBD countries
 codes = fread(ccFile)
@@ -68,7 +70,6 @@ data$country = NULL
 
 # merge estimates to data, keep only data that has all variables specified
 setnames(estimates, c('births', 'birthweight'), c('estimate', 'bw'))
-estimates[, age:=as.character(age)]
 estimates[, sex:=as.character(sex)]
 estimates[, sex:=ifelse(sex==1, 'm', 'f')]
 data = merge(data, estimates, by=c('iso3','year','age','parity','sex','bw'))
