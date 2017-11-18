@@ -1,9 +1,9 @@
-# --------------------------------------
+# -------------------------------------------------
 # David Phillips
 #
 # 4/13/2017
-# Make graphs of birth estimates by asp
-# --------------------------------------
+# Make graphs of envelope model fit in various ways
+# -------------------------------------------------
 
 
 # -------------------
@@ -20,7 +20,7 @@ library(RColorBrewer)
 # Files/directories/lists
 
 # envelope model version
-run_name = ''
+run_name = '_sur'
 
 # envelope file
 inFileEnv = paste0('./Data/Envelopes/Envelope', run_name, '.csv')
@@ -28,10 +28,10 @@ inFileEnv = paste0('./Data/Envelopes/Envelope', run_name, '.csv')
 # output file
 outFile1 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
 outFile2 = paste0('./Visualizations/Envelopes/envelope_model_fit_age', run_name, '.pdf')
-outFile3 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
-outFile4 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
-outFile5 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
-outFile6 = paste0('./Visualizations/Envelopes/envelope_model_fit_year', run_name, '.pdf')
+outFile3 = paste0('./Visualizations/Envelopes/envelope_model_fit_no_sex', run_name, '.pdf')
+outFile4 = paste0('./Visualizations/Envelopes/envelope_model_fit_no_parity', run_name, '.pdf')
+outFile5 = paste0('./Visualizations/Envelopes/envelope_model_fit_no_birthweight', run_name, '.pdf')
+outFile6 = paste0('./Visualizations/Envelopes/envelope_model_fit_no_country_year', run_name, '.pdf')
 # ------------------------------------------------------------------------------------
 
 
@@ -145,7 +145,7 @@ n=1
 for(i in iso3s) { 
 	country = unique(data[iso3==i]$country)
 	
-	collapsedPlots3[[i]] = ggplot(noParity[iso3==i & year %in% seq(1980, 2016, by=5)], aes(x=age, y=prop, color=year, group=year)) + 
+	collapsedPlots2[[i]] = ggplot(noParity[iso3==i & year %in% seq(1980, 2016, by=5)], aes(x=age, y=prop, color=year, group=year)) + 
 		geom_point() + 
 		geom_line(aes(y=pred)) + 
 		facet_wrap(~birthweight, scales='free') + 
@@ -176,15 +176,28 @@ for(i in iso3s) {
 			axis.title=element_text(size=14))
 	n=n+1
 }
-
-# plots without sex, birthweight and parity
 # -------------------------------------------------------------------------------
 
 
-# -------------------------------------------
+# -----------------------------------------------------
 # Save
-pdf(outFile, height=6, width=10)
-p1
-for(i in seq_along(iso3s)) print(plots[[i]])
+pdf(outFile1, height=6, width=10)
+for(i in seq_along(iso3s)) print(timePlots[[i]])
 dev.off()
-# -------------------------------------------
+
+pdf(outFile2, height=6, width=10)
+for(i in seq_along(iso3s)) print(agePlots[[i]])
+dev.off()
+
+pdf(outFile3, height=6, width=10)
+for(i in seq_along(iso3s)) print(collapsedPlots1[[i]])
+dev.off()
+
+pdf(outFile4, height=6, width=10)
+for(i in seq_along(iso3s)) print(collapsedPlots2[[i]])
+dev.off()
+
+pdf(outFile5, height=6, width=10)
+for(i in seq_along(iso3s)) print(collapsedPlots3[[i]])
+dev.off()
+# -----------------------------------------------------
