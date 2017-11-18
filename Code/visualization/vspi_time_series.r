@@ -21,13 +21,13 @@ library(RColorBrewer)
 # Files/directories/lists
 
 # input file
-inFile ='./Data/VSPI_Estimates/VSPI_B_Data 200617_fixed.csv'
+inFile ='./Data/VSPI_Estimates/VSPI_B_Data 061117.csv'
 
 # country codes
 ccFile = './Data/Country_Data/countrycodes.csv'
 
 # output file
-outFile = './Visualizations/VSPI/vspi_estimates_Data 200617_fixed.pdf'
+outFile = './Visualizations/VSPI/vspi_estimates_Data 061117.pdf'
 # --------------------------------------------------------------
 
 

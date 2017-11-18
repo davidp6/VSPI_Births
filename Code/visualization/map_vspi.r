@@ -6,7 +6,7 @@ library(foreign)
 library(RColorBrewer)
 
 # read in and format data
-data = fread('./Data/VSPI_Estimates/VSPI_B_Data 200617_fixed.csv')
+data = fread('./Data/VSPI_Estimates/VSPI_B_Data 061117.csv')
 data = data[!is.na(unspecified_age)]
 data[, mapvar:=vspi_b_ma]
 
@@ -25,4 +25,4 @@ gbd_map(data=data,
 			col=colors,
 			col.reverse=FALSE, 
 			title='VSPI-B', 
-			fname='./Visualizations/VSPI/vspi_map_Data 200617_fixed.pdf') 
+			fname='./Visualizations/VSPI/vspi_map_Data 061117.pdf') 
