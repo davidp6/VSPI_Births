@@ -32,6 +32,14 @@
 # --------------------------------
 # Start function
 runAll = function(envelope=TRUE, prep=TRUE, simulation=TRUE, vspi=TRUE, visualizations=TRUE) { 
+
+
+# for debugging purposes
+# envelope=TRUE
+# prep=TRUE
+# simulation=TRUE
+# vspi=TRUE
+# visualizations=TRUE
 # --------------------------------
 	
 	# -------------------------------------------------------------------
@@ -92,6 +100,7 @@ runAll = function(envelope=TRUE, prep=TRUE, simulation=TRUE, vspi=TRUE, visualiz
 		source('./Code/visualization/graph_accuracy.r')
 		source('./Code/visualization/map_vspi.r')
 		source('./Code/visualization/vspi_time_series.r')
+		source('./Code/visualization/graph_envelope_time_series.r')
 	}
 	# ----------------------------------------------------------------------------------
 }
