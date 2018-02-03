@@ -218,6 +218,9 @@ computeVSPIB = function(inFile='Data 061117.csv', outFile=NULL) {
 	data[, unspecified_bw:=max(unspecified_bw), by=byVars] # bw is the only one to take the worst of since it's garaunteed to be 0 in 'sep'
 	data[, completeness:=max(completeness), by=byVars]
 	data[, total:=mean(total), by=byVars] # sometimes the totals are different! shouldn't happen
+	
+	# store totals
+	totals = unique(data[,c('iso3','year','total'),with=FALSE])
 	# --------------------------------------------------------------------------------------
 	
 	
@@ -292,6 +295,9 @@ computeVSPIB = function(inFile='Data 061117.csv', outFile=NULL) {
 	
 	# drop pre-1980
 	data = data[year>=1980]
+	
+	# bring back total births
+	data = merge(data, totals, by=c('iso3','year'), all.x=TRUE)
 	# -----------------------------------------------------------------------------
 	
 	

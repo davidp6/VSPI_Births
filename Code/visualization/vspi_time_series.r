@@ -89,7 +89,7 @@ graph = function(subData, showOrig) {
 	# graph parity inset
 	plotp = ggplot(subData, aes(y=1-unspecified_parity, x=year)) + 
 				geom_line() + 
-				labs(title='Parity Unspecified', x='', y='') + 
+				labs(title='Birth Order Unspecified', x='', y='') + 
 				ylim(0,1) + 
 				theme_bw() + 
 				theme(plot.title=element_text(hjust=.5), 
