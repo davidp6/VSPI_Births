@@ -20,7 +20,7 @@ library(data.table)
 root = './Data/'
 
 # input file
-inFile = paste0(root, 'Country_Data/Data 061117.csv')
+inFile = paste0(root, 'Country_Data/Data 041217.csv')
 
 # output file
 outFile1 = paste0(root, 'Simulation_Inputs/unspecified_age_probabilities.csv')

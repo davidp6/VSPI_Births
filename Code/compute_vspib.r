@@ -19,7 +19,7 @@
 
 # ---------------------------------------------------------------
 # Start function
-computeVSPIB = function(inFile='Data 061117.csv', outFile=NULL) { 
+computeVSPIB = function(inFile='Data 041217.csv', outFile=NULL) { 
 # ---------------------------------------------------------------
 	
 	# ----------------------------------------

@@ -23,7 +23,7 @@ library(ggplot2)
 # Files and directories
 
 # input file
-vspiFile = './Data/VSPI_Estimates/VSPI_B_Data 061117.csv'
+vspiFile = './Data/VSPI_Estimates/VSPI_B_Data 041217.csv'
 
 # envelope file
 envFile = './Data/Envelopes/Envelope.csv'
