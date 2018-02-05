@@ -100,8 +100,23 @@ computeVSPIB = function(inFile='Data 041217.csv', outFile=NULL) {
 	data[bw %in% c('1', '<2500'), bw:='2500']
 	data[bw %in% c('2', '2500-3499'), bw:='3000']
 	data[bw %in% c('3', '3500+'), bw:='3500']
-	data[bw=='Unknown', bw:='99']
-	data[bw=='N/A', bw:='All']
+	data[bw %in% c('Unknown','N/A'), bw:='99'] 
+	
+	# clarify cases of "aggregate in this row, but specified separately"
+	# 99 always means "missing"
+	# "specified_separately" means there are duplicate rows for this country-year that 
+	# 		have categories of this variable but not necessarily categories of another variable
+	# 		we give every country the best score possible when details aren't cross-tabulated
+	data[parity=='All', parity:='specified_separately']
+	data[age=='All', age:='specified_separately']
+	data[sex=='both', sex:='specified_separately']
+	data[bw=='999', bw:='specified_separately']
+	
+	# ensure only accepted values are present
+	data[!parity %in% c('1','2','3','4','99','specified_separately'), parity:='99']
+	data[!age %in% c('10','15','20','25','30','35','40','45','50','99','specified_separately'), age:='99']
+	data[!sex %in% c('m','f','99','specified_separately'), sex:='99']
+	data[!bw %in% c('2500','3000','3500','99','specified_separately'), age:='99']
 	
 	# add perfect to simData
 	perf = simData[1]
