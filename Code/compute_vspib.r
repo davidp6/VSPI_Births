@@ -85,6 +85,7 @@ computeVSPIB = function(inFile='Data 041217.csv', outFile=NULL) {
 	keepVars = c('Country', 'Year', 'Age', 'Sex', 'Birth order', 'Birthweight', 'Number births')
 	data = data[!is.na(Year), keepVars, with=FALSE]
 	setnames(data, keepVars, c('country', 'year', 'age', 'sex', 'parity', 'bw', 'births'))
+	data = data[!is.na(births) & births!='']
 	
 	# format variables
 	data[parity=='4+', parity:='4']
