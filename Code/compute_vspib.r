@@ -158,6 +158,57 @@ computeVSPIB = function(inFile='Data 041217.csv', outFile=NULL) {
 	# -------------------------------------------------------------------------
 	
 	
+	# -------------------------------------------------------------------------
+	# Handle edge cases
+	
+	# if a country-year-indicator is 100% "specified_separately", 
+	# then it clearly isn't actually specified separately. recode these cases to missing
+	data[, total:=sum(births, na.rm=TRUE), by=c('iso3','year')]
+	vars = c('age','sex','parity','bw')
+	for(var in vars) {
+		data[, ss_total:=sum((get(var)=='specified_separately')*births, na.rm=TRUE), by=c('iso3','year')]
+		data[ss_total==total, (var):='99']
+	}
+	data$ss_total = NULL
+	data$total = NULL
+	
+	# sometimes birth order is listed as "specified_separately" for just one age group
+	# this should be counted as "not specified"
+	# examples: SGP 1998, NLD 1990/1991, SVN 2000/2001, SWE 1994
+	# test this for all possible combinations of variables, just to be safe
+	for(var1 in vars) {
+		for (var2 in vars) {
+			if (var1==var2) next
+			
+			data$n_groups=NULL
+			data[, n_groups:=length(unique(get(var1))), by=c('iso3','year',var2)]
+			data[, max_groups:=max(n_groups), by=c('iso3','year')]
+			
+			# it's ok for variables to be listed as "specified_separately" among males and females but not sex=99
+			if (var1=='sex') data[, n_groups:=n_groups+1]
+			
+			# count instances
+			n = nrow(data[n_groups<max_groups & get(var1)!='specified_separately' & get(var2)=='specified_separately'])
+			
+			# print messages
+			if (n>0) print(paste('sometimes', var2, 'is listed as \"specified_separately\" for just a few', var1, 'groups... they will be counted as \"not specified\"'))
+		}
+	}
+	
+	# sometimes birth order is specified separately, but age groups are specified in detail both times
+	# this creates a potential conflict in the number of unspecified ages
+	# fortunately, no known case has a conflict, but it's still possible
+	# examples: NLD 2015, ITA 2014, GBR 2015
+	
+	# sometimes birth order is specified separately, but sex groups are specified in detail both times
+	# this creates a potential conflict in the number of unspecified sexes
+	# fortunately, no known case has a conflict, but it's still possible
+	# examples (there were 342 at time of writing): ALB 2013, AUT 2000/2006-2013, BHR 1997/2011-2013
+	
+	# all "specified twice" types of cases (like the two chunks above) are handled by the binary byVars below
+	# -------------------------------------------------------------------------
+	
+	
 	# --------------------------------------------------------------------------------------
 	# Compute proportions
 	
